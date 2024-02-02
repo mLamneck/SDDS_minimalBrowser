@@ -11,7 +11,7 @@ class TmenuNavStateClass extends TstructDescr{
     get focusedRow() { return this.FfocusedRow }
     get editing() { return this.Fediting }
 
-    get focusedItem() { return this.FrootStruct.childs[this.FfocusedRow.value] }
+    get focusedItem() { return this.FcurrStruct.childs[this.FfocusedRow.value] }
     get struct() { return this.FcurrStruct }
 
     get isRoot() { return this.struct == this.FrootStruct}
