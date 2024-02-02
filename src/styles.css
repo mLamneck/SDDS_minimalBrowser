@@ -2,9 +2,35 @@
     border: solid;
 }
 
+.verticalContainer{
+    display: flex;
+    flex-direction: column;
+}
+
 .centerDiv{
     display: flex;
     justify-content: center;
+}
+
+.centerElement {
+    justify-content: center;
+}
+
+.backButton {
+    margin-top: 10px;
+    border-radius: 5px;
+    height: 30px;
+    border:none;
+    border-radius:10px;
+    color: #1565c0;
+    font-weight: 400;
+    font-size: 1rem;
+    font-family: "Roboto","Helvetica","Arial",sans-serif;
+}
+
+.backButton:hover {
+    background-color: aqua;
+    transition: 0.5s;
 }
 
 .editRow {

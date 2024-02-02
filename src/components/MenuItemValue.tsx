@@ -18,6 +18,7 @@ function MenuItemValue({item} : TmenuItemValueProps) {
     const ref = useFocusHtmlElement(editing)
    
     function onFocus(){
+        if (item.isStruct) return
         ref.current?.select()
     }
 
@@ -28,19 +29,27 @@ function MenuItemValue({item} : TmenuItemValueProps) {
     function onKeyDown(e : KeyboardEvent){
         switch(e.code){
             case "Escape": case "ArrowLeft": return cancelEdit()
-            case "Enter": break
+            case "Enter": return cancelEdit()
         }
+    }
+
+    function onClick(){
+        nav.focusedRow.setValue(item.idx,false)
+        nav.enterValue()
     }
 
     return (
         <input 
             className={"editField"} 
             type="text" 
+            name={item.name}
             value={item.value}
+            readOnly={!item.editable}
 
             onFocus={onFocus}
             onBlur={cancelEdit}
             onKeyDown={onKeyDown}
+            onClick={onClick}
 
             ref={ref}
         />

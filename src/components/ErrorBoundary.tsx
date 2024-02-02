@@ -18,11 +18,11 @@ function ErrorBoundary(props : TerrorBoundaryProps){
  
         <button onClick={resetError}>Try again</button>
       </>
-    );
+    )
   }
  
   return <div>
-    {props.children};
+    {props.children}
   </div>
 }
 

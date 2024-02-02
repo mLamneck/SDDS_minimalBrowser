@@ -23,15 +23,10 @@ function MenuItemRow(props: TmenuItemRowProps) {
     function onKeyDown(e : KeyboardEvent){
         console.log("key down",e)
         switch(e.code){
-            case "ArrowDown":
-                nav.focusNext()
-                break
-            case "ArrowUp":
-                nav.focusPrev()
-                break
-            case "ArrowRight":
-                nav.enterValue()
-                break    
+            case "ArrowDown": return (nav.focusNext())
+            case "ArrowUp": return (nav.focusPrev())
+            case "ArrowRight": return (nav.enterValue())
+            case "ArrowLeft": return (nav.leaveStruct())
         }
     }
 
@@ -42,20 +37,19 @@ function MenuItemRow(props: TmenuItemRowProps) {
     const ref = useFocusHtmlElement(focus)
     
     return (
-        <div>
-            <div className={"editRow"}>
-                <input 
-                    spellCheck={false} 
-                    readOnly={true} 
-                    className={"editField"} 
-                    type="text" 
-                    onKeyDown={onKeyDown}
-                    onFocus={onFocus}
-                    value={item.name}
-                    ref={ref}
-                />
-                <MenuItemValue item={item}></MenuItemValue>
-            </div>
+        <div className={"editRow"}>
+            <input 
+                spellCheck={false} 
+                readOnly={true} 
+                className={"editField"} 
+                name={item.name}
+                type="text" 
+                onKeyDown={onKeyDown}
+                onFocus={onFocus}
+                value={item.name}
+                ref={ref}
+            />
+            <MenuItemValue item={item}></MenuItemValue>
         </div>
     )
 }

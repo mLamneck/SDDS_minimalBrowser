@@ -6,15 +6,20 @@ class TmenuNavStateClass extends TstructDescr{
     private FfocusedRow = new TnumberDescr();
     private Fediting = new TnumberDescr();
     private FrootStruct : TstructDescr;
+    private FcurrStruct : TstructDescr;
 
     get focusedRow() { return this.FfocusedRow }
     get editing() { return this.Fediting }
 
     get focusedItem() { return this.FrootStruct.childs[this.FfocusedRow.value] }
+    get struct() { return this.FcurrStruct }
+
+    get isRoot() { return this.struct == this.FrootStruct}
     
     constructor(_struct : TstructDescr){
         super()
         this.FrootStruct = _struct
+        this.FcurrStruct = _struct
     }
 
     focusNext(){
@@ -31,14 +36,21 @@ class TmenuNavStateClass extends TstructDescr{
 
     enterValue(){
         const item = this.focusedItem
-        console.log("-> enterValue",item)
         if (!item) return
         if (item.isStruct){
-
+            this.FcurrStruct.emitOnChange()
+            this.FcurrStruct = item as TstructDescr
+            this.FfocusedRow.value = 0
         }
         else{
-            console.log("set editing = 1")
             this.Fediting.value = 1
+        }
+    }
+    leaveStruct(){
+        if (this.struct.parent){
+            this.struct.emitOnChange()
+            this.FcurrStruct = this.struct.parent
+            this.FfocusedRow.value = 0
         }
     }
 

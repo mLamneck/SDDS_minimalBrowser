@@ -9,7 +9,7 @@ type TflatBrowserProps = {
 function FlatBrowser({struct} : TflatBrowserProps) {
   return (
     <MenuNavProvider root={struct}>
-        <MenuItemList struct={struct}/>
+        <MenuItemList/>
     </MenuNavProvider>
   )
 }
