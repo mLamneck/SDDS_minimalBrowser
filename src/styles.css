@@ -1,0 +1,35 @@
+.border {
+    border: solid;
+}
+
+.centerDiv{
+    display: flex;
+    justify-content: center;
+}
+
+.editRow {
+    /* border: dashed; */
+    padding:2px;
+    margin: 2px;
+    display: flex;
+    justify-content: center;
+}
+
+.editField {
+    margin-left: 8px;
+    margin-bottom: 8px;
+    font-weight: 400;
+    font-size: 1rem;
+    font-family: "Roboto","Helvetica","Arial",sans-serif;
+
+    border: none;
+    border-bottom: solid 1px;
+    height: 15px;
+    padding: 8px;
+    outline: none;
+}
+
+.editField:focus {
+    border-bottom: solid 2px;
+    border-color: #1565c0;
+}
