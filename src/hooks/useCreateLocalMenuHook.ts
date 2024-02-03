@@ -12,7 +12,7 @@ function useCreateLocalMenuHook(){
         const struct = new TstructDescr("myFakeWebsocket")
         let menuDefStr = `[
         {"type":1, "name": "byte", "opt":1, "value": 1}
-        ,{"type":2, "name": "word", "opt":0, "value": 2}
+        ,{"type":2, "name": "word", "opt":1, "value": 2}
         ,{"type":1, "name": "action", "opt":0, "value": 0, "enums": ["___","open","close","emergency"]}
         ,{"type":1, "name": "actionRO", "opt":1, "value": 0, "enums": ["___","cooldown","warmup"]}
         ,{"type":66, "name": "settings", "opt":0, "value": [
@@ -47,7 +47,7 @@ function useCreateLocalMenuHook(){
             })
         }
 
-        const timerIntv = window.setInterval(handleTimer, 1000)
+        const timerIntv = window.setInterval(handleTimer, 100)
         return () => {
             window.clearInterval(timerIntv)
         }

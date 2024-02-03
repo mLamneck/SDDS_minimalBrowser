@@ -1,12 +1,13 @@
 import { createContext, ComponentChildren } from "preact";
 import { useContext } from "preact/hooks";
-import { TnumberDescr, TstructDescr } from "../system/sdds/types";
+import { TnumberDescr, Tdescr, TstructDescr } from "../system/sdds/types";
 
 class TmenuNavStateClass extends TstructDescr{
     private FfocusedRow = new TnumberDescr();
     private Fediting = new TnumberDescr();
     private FrootStruct : TstructDescr;
     private FcurrStruct : TstructDescr;
+    status = new Tdescr;
 
     get focusedRow() { return this.FfocusedRow }
     get editing() { return this.Fediting }
@@ -22,40 +23,66 @@ class TmenuNavStateClass extends TstructDescr{
         this.FcurrStruct = _struct
     }
 
+    logStatus(){
+        const focIdx = this.focusedItem.idx
+        this.status.value = `acitveRow = ${focIdx}, editing=${this.Fediting.value}`
+    }
+
     focusNext(){
         const v = this.FfocusedRow.value
         if (v + 1 >= this.FrootStruct.childs.length) return
         this.FfocusedRow.value = this.FfocusedRow.value + 1;
+        this.logStatus()
     }
 
     focusPrev(){
         const v = this.FfocusedRow.value
         if (v <= 0) return
         this.FfocusedRow.value = v-1;
+        this.logStatus()
     }
 
-    enterValue(){
+    enterStruct(_struct : TstructDescr){
+        this.FcurrStruct.emitOnChange()
+        this.FcurrStruct = _struct as TstructDescr
+        this.FfocusedRow.value = 0
+
+    }
+
+    startEdit(){
         const item = this.focusedItem
-        if (!item) return
-        if (item.isStruct){
-            this.FcurrStruct.emitOnChange()
-            this.FcurrStruct = item as TstructDescr
-            this.FfocusedRow.value = 0
-        }
+        if (item.isStruct) this.enterStruct(item as TstructDescr)
         else{
             this.Fediting.value = 1
+            console.log(`nav: ${item.name} editing=1`)
         }
+        this.logStatus()
     }
+
+    editStarted(item : Tdescr){
+        this.Fediting.setValue(1,false)
+        this.FfocusedRow.setValue(item.idx,false)
+        this.logStatus()
+    }
+
     leaveStruct(){
         if (this.struct.parent){
             this.struct.emitOnChange()
             this.FcurrStruct = this.struct.parent
             this.FfocusedRow.value = 0
         }
+        this.logStatus()
     }
 
     cancelEdit(){
+        console.log(`nav: ${this.focusedItem.name} cancelEdit`)
         this.Fediting.value = 0
+        this.logStatus()
+    }
+
+    editCanceled(){
+        this.Fediting.setValue(0,false)
+        this.logStatus()
     }
 } 
 

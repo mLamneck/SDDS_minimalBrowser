@@ -30,7 +30,6 @@
 
 .backButton:hover {
     background-color: aqua;
-    transition: 0.5s;
 }
 
 .editRow {
@@ -39,6 +38,10 @@
     margin: 2px;
     display: flex;
     justify-content: center;
+}
+
+.readonly {
+    color : grey;
 }
 
 .editField {
@@ -53,6 +56,7 @@
     height: 15px;
     padding: 8px;
     outline: none;
+    border-bottom-color: black;
 }
 
 .editField:focus {

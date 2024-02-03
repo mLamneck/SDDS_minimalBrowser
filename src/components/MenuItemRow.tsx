@@ -10,13 +10,12 @@ type TmenuItemRowProps = {
 }
 
 function MenuItemRow(props: TmenuItemRowProps) {
-    console.log("render MenuItemRow")
     const { item } = props
+    console.log(`render MenuItemRow ${item.name}`)
     
     const nav = useMenuNavContext()
-    useRerenderOnValueChange(nav.focusedRow)    
-    useRerenderOnValueChange(nav.editing)    
-    useRerenderOnValueChange(item)  
+    useRerenderOnValueChange(nav.focusedRow)
+    useRerenderOnValueChange(nav.editing)
 
     const focus =  nav.focusedRow.value === item.idx && nav.editing.value === 0
 
@@ -25,7 +24,7 @@ function MenuItemRow(props: TmenuItemRowProps) {
         switch(e.code){
             case "ArrowDown": return (nav.focusNext())
             case "ArrowUp": return (nav.focusPrev())
-            case "ArrowRight": return (nav.enterValue())
+            case "ArrowRight": return (nav.startEdit())
             case "ArrowLeft": return (nav.leaveStruct())
         }
     }

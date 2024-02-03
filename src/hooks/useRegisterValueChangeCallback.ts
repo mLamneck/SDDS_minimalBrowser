@@ -27,7 +27,7 @@ function useRegisterValueChangeCallback(item : Tdescr, installCallback : boolean
     return [value, setValue, registerOnChangeCallback, unregisterOnChangeCallback]
 }
 
-export function useRerenderOnValueChange(item : Tdescr){
+export function useRerenderOnValueChange(item : Tdescr, active = true){
     const [,setTrigger] = useState(0)
     
     const onValueChange = useCallback(()=>{
@@ -35,11 +35,11 @@ export function useRerenderOnValueChange(item : Tdescr){
     },[])
 
     useEffect(()=>{
-        item.registerOnChangeCallback(onValueChange)
+        if (active) item.registerOnChangeCallback(onValueChange)
         return () => {
             item.unregisterOnChangeCallback(onValueChange)
         }
-    },[item,onValueChange])
+    },[item,onValueChange,active])
 }
 
 export function useOnValueChange(_item : Tdescr, _onValueChange : ()=>void){    

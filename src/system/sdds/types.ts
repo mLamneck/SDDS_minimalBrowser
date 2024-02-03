@@ -148,7 +148,7 @@ export class Tdescr{
     }
 
     getValue(){
-        console.log("Tdescr.getValue")
+        return this.Fvalue
     }
 
     findObserver(_cb : OnChangeCallback){

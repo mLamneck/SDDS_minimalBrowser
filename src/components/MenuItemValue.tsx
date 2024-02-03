@@ -2,58 +2,42 @@ import useFocusHtmlElement from "../hooks/useFocusHtmlElement"
 import { useRerenderOnValueChange } from "../hooks/useRegisterValueChangeCallback"
 import { Tdescr } from "../system/sdds/types"
 import { useMenuNavContext } from "./MenuNavContext"
+import Edit from "./itemDisplayComponents/Edit"
+import Select from "./itemDisplayComponents/Select"
 
 type TmenuItemValueProps = {
     item : Tdescr
 }
 
 function MenuItemValue({item} : TmenuItemValueProps) {
+    //console.log(`render MenuItemValue ${item.name}`)
     const nav = useMenuNavContext()
+    const editing = nav.focusedRow.value === item.idx && nav.editing.value === 1   
 
-    useRerenderOnValueChange(nav.focusedRow)    
-    useRerenderOnValueChange(nav.editing)    
-    useRerenderOnValueChange(item)    
-    const editing = nav.focusedRow.value === item.idx && nav.editing.value === 1
+    useRerenderOnValueChange(nav.focusedRow)
+    useRerenderOnValueChange(nav.editing)
+    useRerenderOnValueChange(item,!editing)
 
-    const ref = useFocusHtmlElement(editing)
-   
-    function onFocus(){
-        if (item.isStruct) return
-        ref.current?.select()
+    const commonProps = {
+        item,
+        editing,
+
+        setValue: (value: any)=>{},
+        onStartEdit: ()=>{},
+        onCancelEdit: ()=>{},
+        onFinishEdit: (value: any)=>{},
     }
 
-    function cancelEdit(){ 
-        nav.cancelEdit()
+    //how does this work in jsx below? #1
+    //const test = {...commonProps, item: item as TenumDescr}
+    switch(item.baseType){
+        case 'enum': 
+            return <Select {...commonProps}></Select>
+        case 'int': case 'uint' : case 'float' : case 'struct': 
+            return <Edit {...commonProps}></Edit>
+        default: 
     }
-
-    function onKeyDown(e : KeyboardEvent){
-        switch(e.code){
-            case "Escape": case "ArrowLeft": return cancelEdit()
-            case "Enter": return cancelEdit()
-        }
-    }
-
-    function onClick(){
-        nav.focusedRow.setValue(item.idx,false)
-        nav.enterValue()
-    }
-
-    return (
-        <input 
-            className={"editField"} 
-            type="text" 
-            name={item.name}
-            value={item.value}
-            readOnly={!item.editable}
-
-            onFocus={onFocus}
-            onBlur={cancelEdit}
-            onKeyDown={onKeyDown}
-            onClick={onClick}
-
-            ref={ref}
-        />
-    )
+    return <></>
 }
 
 export default MenuItemValue
