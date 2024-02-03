@@ -9,7 +9,6 @@ export function App() {
   return (
     <>
       <ErrorBoundary>
-        <h1>Hello World 1</h1>
         <div className={"centerDiv"}>
           <h1>SDDS Client</h1>
         </div>

@@ -1,5 +1,4 @@
-import useFocusHtmlElement from "../hooks/useFocusHtmlElement"
-import { useRerenderOnValueChange } from "../hooks/useRegisterValueChangeCallback"
+import useRegisterValueChangeCallback, { useRerenderOnValueChange } from "../hooks/useRegisterValueChangeCallback"
 import { Tdescr } from "../system/sdds/types"
 import { useMenuNavContext } from "./MenuNavContext"
 import Edit from "./itemDisplayComponents/Edit"
@@ -16,16 +15,41 @@ function MenuItemValue({item} : TmenuItemValueProps) {
 
     useRerenderOnValueChange(nav.focusedRow)
     useRerenderOnValueChange(nav.editing)
-    useRerenderOnValueChange(item,!editing)
+    const [value, setValue, registerOnChangeCallback, unregisterOnChangeCallback] = useRegisterValueChangeCallback(item)
+
+    //toDo rename to editStarted
+    function onEditStarted(){
+        unregisterOnChangeCallback()
+        nav.editStarted(item)
+    }
+
+    function onCancelEdit(){
+        registerOnChangeCallback()
+        nav.cancelEdit()
+    }
+
+    function onEditDone(){
+        nav.editCanceled()
+        registerOnChangeCallback()
+    }
+
+    function onFinishEdit(value: any){
+        onCancelEdit()
+        console.log("MenuItemValue. onFinishEdit",value)
+        item.setValue(value)
+    }
 
     const commonProps = {
         item,
         editing,
+        value,
 
-        setValue: (value: any)=>{},
+        setValue,
         onStartEdit: ()=>{},
-        onCancelEdit: ()=>{},
-        onFinishEdit: (value: any)=>{},
+        onEditStarted,
+        onCancelEdit,
+        onFinishEdit,
+        onEditDone
     }
 
     //how does this work in jsx below? #1

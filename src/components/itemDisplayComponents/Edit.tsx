@@ -1,35 +1,37 @@
-import { useState } from "preact/hooks"
 import useFocusHtmlElement from "../../hooks/useFocusHtmlElement"
 import { TstructDescr } from "../../system/sdds/types"
 import { useMenuNavContext } from "../MenuNavContext"
 import { TCommonProps } from "./CommonProps"
 
 
-function Edit({item, editing} : TCommonProps) {
+function Edit({item, editing, onEditStarted, onCancelEdit, onEditDone, onFinishEdit} : TCommonProps) {
     const nav = useMenuNavContext()
-    const ref = useFocusHtmlElement(editing,true)
+    const ref = useFocusHtmlElement(editing)
 
     function onFocus(){
-        console.log(`Edit: onFocus ${item.name}`)
         ref.current?.select()
-        nav.editStarted(item)
+        onEditStarted()
     }
 
     function onClick(){
-        console.log(`Edit: on click ${item.name}`)
         if (item.isStruct) nav.enterStruct(item as TstructDescr)
     }
 
     function cancelEdit(){ 
-        console.log(`Edit: on blur ${item.name}`)
-        nav.cancelEdit()
+        onCancelEdit()
     }
 
     function onKeyDown(e : KeyboardEvent){
+        console.log(`Edit onKeyDown`,e)
         switch(e.code){
             case "Escape": case "ArrowLeft": return cancelEdit()
-            case "Enter": return cancelEdit()
+            case "Enter": onFinishEdit(ref.current?.value)
         }
+    }
+    
+    function myOnEditDone(){
+        onEditDone()
+        if (ref.current) ref.current.value = item.value
     }
 
     let type = "number"
@@ -40,20 +42,29 @@ function Edit({item, editing} : TCommonProps) {
     }
 
     return (
-        <input 
-            className={`editField ${item.readonly?'readonly':''}`} 
-            type={type} 
-            name={item.name}
-            value={item.value}
-            readOnly={item.readonly}
+        //for mobiles devices (only android?) the form tag is necessary to show the enter button
+        //on the softkeyboard... on the other hand it seems like the event in the onKeyDown/Press has no
+        //information about the pressed key on mobiles in PREACT, so we are killing 2 birds with one 
+        //stone here...
+        <form onSubmit={(e)=>{
+            onFinishEdit(ref.current?.value)
+            e.preventDefault()
+        }}>
+            <input 
+                className={`editField textEditField ${item.readonly?'readonly':''}`} 
+                type={type} 
+                name={item.name}
+                value={item.value}
+                readOnly={item.readonly}
 
-            onFocus={onFocus}
-            onBlur={()=>nav.editCanceled()}
-            onKeyDown={onKeyDown}
-            onMouseDown={onClick}
+                onFocus={onFocus}
+                onBlur={myOnEditDone}
+                onKeyDown={onKeyDown}
+                onMouseDown={onClick}
 
-            ref={ref}
-        />
+                ref={ref}
+            />
+        </form>
     )
 }
 

@@ -31,7 +31,6 @@ function useCreateLocalMenuHook(){
         //emulate some changes in values, that would usually be triggered 
         //by updates received from devices over webSocket
         function handleTimer() {
-            return
             //console.log("timer")
             //console.log(struct)
             struct.childs.forEach(item => {
@@ -47,7 +46,7 @@ function useCreateLocalMenuHook(){
             })
         }
 
-        const timerIntv = window.setInterval(handleTimer, 100)
+        const timerIntv = window.setInterval(handleTimer, 1000)
         return () => {
             window.clearInterval(timerIntv)
         }

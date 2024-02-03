@@ -1,13 +1,18 @@
 import { useEffect, useRef } from "preact/hooks"
 
-function useFocusHtmlElement(focus : boolean, select = false) {
+function useFocusHtmlElement(focus : boolean) {
+    console.log("-> useFocusHtmlElement")
     const ref = useRef<HTMLInputElement>(null)
+
+    //empty dependecy array -> we want to trigger this regardless
+    //if variable focus has changed or not to make sure we are
+    //setting the focus if neccessary. This can happen, because we
+    //are not rerendering everytime.
     useEffect(()=>{
         if (ref.current && focus){
             ref.current.focus()
-            if (select) ref.current.select()
         }
-    },[focus, select])
+    })
     return ref
 }
 

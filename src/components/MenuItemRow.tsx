@@ -20,7 +20,6 @@ function MenuItemRow(props: TmenuItemRowProps) {
     const focus =  nav.focusedRow.value === item.idx && nav.editing.value === 0
 
     function onKeyDown(e : KeyboardEvent){
-        console.log("key down",e)
         switch(e.code){
             case "ArrowDown": return (nav.focusNext())
             case "ArrowUp": return (nav.focusPrev())

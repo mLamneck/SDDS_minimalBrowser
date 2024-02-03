@@ -1,5 +1,5 @@
 .border {
-    border: solid;
+    border: solid1;
 }
 
 .verticalContainer{
@@ -53,10 +53,20 @@
 
     border: none;
     border-bottom: solid 1px;
-    height: 15px;
-    padding: 8px;
     outline: none;
     border-bottom-color: black;
+    width: 150px;
+    margin-right: 5px;
+}
+
+.textEditField {
+    height: 15px;
+    padding-bottom: 10px;
+}
+
+.selectField {
+    padding: 8px;
+    background-color: white;
 }
 
 .editField:focus {
