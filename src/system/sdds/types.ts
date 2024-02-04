@@ -151,6 +151,8 @@ export class Tdescr{
         return this.Fvalue
     }
 
+    toString(){ return this.Fvalue.toString() }
+
     findObserver(_cb : OnChangeCallback){
         return this.Fobservers.findIndex(o=>o.cb===_cb)
     }
@@ -235,9 +237,7 @@ export class TenumDescr extends Tdescr{
         if ((value >= 0) && (value < this.Fenums.length)) super.setValue(value,signalEvent)
     }
 
-    getValue(){
-        return this.Fvalue
-    }
+    toString(){ return this.enums[this.Fvalue as number] }
 
     constructor(_descr : any){
         super()

@@ -1,25 +1,24 @@
-import { useEffect, useRef } from "preact/hooks";
 import { TenumDescr } from "../../system/sdds/types";
 import { TCommonProps } from "./CommonProps"
+import useFocusHtmlElement from "../../hooks/useFocusHtmlElement";
 
-function Select({item, editing}: TCommonProps) {
+function Select({item, editing, onFinishEdit, onEditStarted, onCancelEdit}: TCommonProps) {
     const options = (item as TenumDescr).enums;
-    const ref = useRef<HTMLSelectElement>(null)
-    useEffect(()=>{
-        if (editing && ref.current){
-            
-        }
-    },[editing])
+    const ref = useFocusHtmlElement<HTMLSelectElement>(editing)
+
     return (
         <div>
             <select 
-                id="123"
+                value={item.toString()}
                 className={"editField selectField"}
+                onFocus={onEditStarted}
+                onKeyDown={e=>{if (e.key === "Escape") onCancelEdit()}}
+                onChange={e=>onFinishEdit(e.currentTarget.value)}
                 ref={ref}
             >
                 {options.map((option, idx) => {
                     return (
-                        <option key={idx} selected={item.idx===idx}>
+                        <option key={idx}>
                             {option}
                         </option>
                     );

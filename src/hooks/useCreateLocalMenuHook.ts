@@ -33,11 +33,12 @@ function useCreateLocalMenuHook(){
         function handleTimer() {
             //console.log("timer")
             //console.log(struct)
+            if (struct.childs[0].value === 1) return
             struct.childs.forEach(item => {
                 switch (item.baseType) {
                     case 'enum' : {
                         const enums = (item as TenumDescr).enums
-                        item.setValue(item.value + 1 < enums.length ? item.value + 1 : 0)
+                        //item.setValue(item.value + 1 < enums.length ? item.value + 1 : 0)
                         break
                     }
                     case 'struct': break
