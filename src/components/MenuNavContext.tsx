@@ -29,13 +29,15 @@ class TmenuNavStateClass extends TstructDescr{
     }
 
     focusNext(){
+        console.log("focusNext")
         const v = this.FfocusedRow.value
-        if (v + 1 >= this.FrootStruct.childs.length) return
+        if (v + 1 >= this.FcurrStruct.childs.length) return
         this.FfocusedRow.value = this.FfocusedRow.value + 1;
         this.logStatus()
     }
 
     focusPrev(){
+        console.log("focusPrev")
         const v = this.FfocusedRow.value
         if (v <= 0) return
         this.FfocusedRow.value = v-1;
@@ -43,15 +45,16 @@ class TmenuNavStateClass extends TstructDescr{
     }
 
     enterStruct(_struct : TstructDescr){
+        console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXX enter struct XXXXXXXXXXXXXXXXXXXXXXXXXX")
         this.FcurrStruct.emitOnChange()
         this.FcurrStruct = _struct as TstructDescr
         this.FfocusedRow.value = 0
-
     }
 
     startEdit(){
         const item = this.focusedItem
-        if (item.isStruct) this.enterStruct(item as TstructDescr)
+        console.log("start edit")
+        if (item.hasChilds) this.enterStruct(item as TstructDescr)
         else{
             this.Fediting.value = 1
             console.log(`nav: ${item.name} editing=1`)

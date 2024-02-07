@@ -1,5 +1,38 @@
-import {useCallback, useEffect, useState} from 'preact/hooks'
-import { Tdescr } from '../system/sdds/types'
+import {useCallback, useEffect, useRef, useState, StateUpdater, MutableRef} from 'preact/hooks'
+import { Tdescr, TobserverObj } from '../system/sdds/types'
+
+type TuseRegisterObserverRes = {
+    observer : MutableRef<TobserverObj>, 
+    value : any, 
+    setValue:StateUpdater<any> 
+}
+
+export function useRegisterObserver(item : Tdescr) : TuseRegisterObserverRes{
+    const observer = useRef<TobserverObj>(new TobserverObj(()=>{}))
+    const [value, setValue] = useState(item.value)
+    
+    useEffect(()=>{
+        const newObserver = item.observers.add(()=> setValue(item.value))
+        if (newObserver) observer.current = newObserver 
+        return ()=>{
+            item.observers.remove(observer.current)
+        }
+    },[item])
+
+    return {observer, value, setValue}
+}
+
+export function useRegisterObserver1(item : Tdescr){
+    const {observer, value, setValue} = useRegisterObserver(item)
+    function registerOnChangeCallback(){
+        observer.current.setActive(true)
+    }
+
+    function unregisterOnChangeCallback(){
+        observer.current.setActive(false)
+    }
+    return [value, setValue, registerOnChangeCallback, unregisterOnChangeCallback]
+}
 
 function useRegisterValueChangeCallback(item : Tdescr, installCallback : boolean = true) {
     const [value, setValue] = useState(item.value)
@@ -42,7 +75,7 @@ export function useRerenderOnValueChange(item : Tdescr, active = true){
     },[item,onValueChange,active])
 }
 
-export function useOnValueChange(_item : Tdescr, _onValueChange : ()=>void){    
+export function useOnValueChange(_item : Tdescr, _onValueChange : ()=>void){
     const onValueChange = useCallback(()=>{
         _onValueChange()
     },[_onValueChange])

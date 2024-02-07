@@ -45,6 +45,8 @@
 }
 
 .editField {
+    background-color: inherit;
+
     margin-left: 8px;
     margin-bottom: 8px;
     font-weight: 400;

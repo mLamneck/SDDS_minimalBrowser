@@ -1,24 +1,34 @@
+import { useState } from "preact/hooks"
 import ErrorBoundary from "./components/ErrorBoundary"
 import FlatBrowser from "./components/FlatBrowser"
 import useCreateLocalMenuHook from "./hooks/useCreateLocalMenuHook"
+import { useRerenderOnValueChange } from "./hooks/useRegisterValueChangeCallback"
+import TremoteServer from "./system/RemoteServer"
+
+function Status({server} : {server : TremoteServer}){
+  useRerenderOnValueChange(server)
+  return <span>wsStatus = { server.status }</span>
+}
 
 export function App() {
   console.log("render app")
-  const struct = useCreateLocalMenuHook()
+  console.log(window.location)
 
+  const [server, ] = useState(new TremoteServer({
+    hostname: 'localhost',
+    port: 8000,
+  }))
+
+  const struct = useCreateLocalMenuHook()
+  //const struct = server
   return (
     <>
       <ErrorBoundary>
-        <div className={"centerDiv"}>
-          <h1>SDDS Client</h1>
-        </div>
-        <div className={"border"}>
-          {struct ?
-            <FlatBrowser struct={struct} />
-            : null
-          }
-        </div>
-
+        {struct ?
+          <FlatBrowser struct={struct} />
+          : null
+        }
+        <Status server={server}></Status>
       </ErrorBoundary>
     </>
   )

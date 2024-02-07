@@ -11,7 +11,7 @@ type TmenuItemRowProps = {
 
 function MenuItemRow(props: TmenuItemRowProps) {
     const { item } = props
-    console.log(`render MenuItemRow ${item.name}`)
+    //console.log(`render MenuItemRow ${item.name}`)
     
     const nav = useMenuNavContext()
     useRerenderOnValueChange(nav.focusedRow)

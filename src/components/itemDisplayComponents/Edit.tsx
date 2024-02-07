@@ -7,14 +7,14 @@ import { TCommonProps } from "./CommonProps"
 function Edit({item, editing, onEditStarted, onCancelEdit, onEditDone, onFinishEdit} : TCommonProps) {
     const nav = useMenuNavContext()
     const ref = useFocusHtmlElement(editing)
-
+    //console.log("render Edit",item.value)
     function onFocus(){
         ref.current?.select()
         onEditStarted()
     }
 
-    function onClick(){
-        if (item.isStruct) nav.enterStruct(item as TstructDescr)
+    function onClick(){ 
+        if (item.hasChilds) nav.enterStruct(item as TstructDescr) 
     }
 
     function cancelEdit(){ 
@@ -55,7 +55,7 @@ function Edit({item, editing, onEditStarted, onCancelEdit, onEditDone, onFinishE
                 type={type} 
                 name={item.name}
                 value={item.value}
-                readOnly={item.readonly}
+                readOnly={!item.editable}
 
                 onFocus={onFocus}
                 onBlur={myOnEditDone}

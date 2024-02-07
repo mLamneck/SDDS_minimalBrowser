@@ -18,6 +18,58 @@ export type BaseDataTypes = "int"|"uint"|"float"|"enum"|"struct"|"invalid"
 //     console.log(testament)
 // });
 
+export type TobserverCb = () => void;
+
+export class TobserverObj{
+    Fcb : TobserverCb; 
+    Factive : boolean = true;
+
+    get cb() { return this.Fcb; }
+
+    setActive(_val : boolean) { this.Factive = _val}
+    notify(){
+        if (this.Factive) this.Fcb()
+        else console.log("not active")
+    }
+
+    constructor(_cb : TobserverCb){
+        this.Fcb = _cb;
+    }
+}
+
+class TObserverList{
+    private Fobservers : TobserverObj[] = []
+    
+    findByCb(_cb : TobserverCb){
+        let idx;
+        this.Fobservers.forEach((o,_idx)=>{
+            if (o.cb == _cb){
+                idx = _idx;
+                return false;
+            } 
+        })
+        return idx;
+    }
+
+    add(_cb : TobserverCb) {
+        if (this.findByCb(_cb)) return;
+        const observer = new TobserverObj(_cb)
+        this.Fobservers.push(observer)
+        return observer
+    }
+
+    remove(_observer : TobserverObj|undefined){
+        if (!_observer) return
+        const idx = this.Fobservers.indexOf(_observer)
+        if (idx >= 0) this.Fobservers.splice(idx,1)
+    }
+
+    notify(){ 
+        this.Fobservers.forEach(o=>o.notify()) 
+    }
+
+}
+
 export class Tdescr{
     static PATH_SEP = "."
 
@@ -86,6 +138,8 @@ export class Tdescr{
     protected Fparent : TstructDescr|null = null
     private Fidx : number = -1
     private Fobservers: Tobserver[] = []
+    private FobserverList = new TObserverList;
+    get observers() { return this.FobserverList }
 
     get parent() : (TstructDescr|null) { return this.Fparent }
     set parent(_parent : TstructDescr|null) { this.Fparent = _parent }
@@ -115,6 +169,8 @@ export class Tdescr{
     get isStruct(){
         return (this.Ftype === Tdescr.type_struct)
     }
+
+    get hasChilds(){ return false }
 
     get isEnum() : boolean{
         return (this instanceof TenumDescr)
@@ -157,9 +213,9 @@ export class Tdescr{
         return this.Fobservers.findIndex(o=>o.cb===_cb)
     }
 
-    registerObserver(_o : TobservedItem){
-        return _o
-    }
+    // registerObserver(_o : TobservedItem){
+    //     return _o
+    // }
 
     registerOnChangeCallback(_cb : OnChangeCallback){
         const idx = this.findObserver(_cb)
@@ -182,6 +238,7 @@ export class Tdescr{
 
     emitOnChange(){
         this.Fobservers.forEach(o=>o.cb(this))
+        this.FobserverList.notify()
     }
 
     readJson(_descr : any){
@@ -196,6 +253,7 @@ export class Tdescr{
     }
 
     constructor(_name : string = ""){
+        this.Ftype = Tdescr.type_struct
         //this.FsigVal = signal(0);
         this.Fname = _name
         this.id = Tdescr.objCnt++
@@ -269,8 +327,9 @@ export class TstructDescr extends Tdescr{
     }
 
     get isEmpty(){ return this.childs.length === 0 }
+    get hasChilds(){ return !this.isEmpty }
    
-    getValue() {return this.isEmpty?"NULL":">"}
+    getValue() { return this.isEmpty?"NULL":">" }
 
     setValue(value : any){
         //nobody is allowed to write to Fvalue
@@ -410,7 +469,7 @@ export class TstructDescr extends Tdescr{
     readValueArray(_arr : string[], first : number = 0){
         _arr.forEach((value)=>{
             if (first >= this.childs.length) return false
-            console.log(`setting ${this.childs[first].name}=${value}`)
+            //console.log(`setting ${this.childs[first].name}=${value}`)
             this.childs[first++].setValue(value)
         })
     }

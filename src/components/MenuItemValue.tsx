@@ -1,4 +1,4 @@
-import useRegisterValueChangeCallback, { useRerenderOnValueChange } from "../hooks/useRegisterValueChangeCallback"
+import useRegisterValueChangeCallback, { useRegisterObserver, useRegisterObserver1, useRerenderOnValueChange } from "../hooks/useRegisterValueChangeCallback"
 import { Tdescr } from "../system/sdds/types"
 import { useMenuNavContext } from "./MenuNavContext"
 import Edit from "./itemDisplayComponents/Edit"
@@ -15,7 +15,8 @@ function MenuItemValue({item} : TmenuItemValueProps) {
 
     useRerenderOnValueChange(nav.focusedRow)
     useRerenderOnValueChange(nav.editing)
-    const [value, setValue, registerOnChangeCallback, unregisterOnChangeCallback] = useRegisterValueChangeCallback(item)
+    //const [value, setValue, registerOnChangeCallback, unregisterOnChangeCallback] = useRegisterValueChangeCallback(item)
+    const [value, setValue, registerOnChangeCallback, unregisterOnChangeCallback] = useRegisterObserver1(item)
 
     //toDo rename to editStarted
     function onEditStarted(){
