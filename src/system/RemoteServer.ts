@@ -1,5 +1,5 @@
 import { TobservedItem, Tpath, TstructDescr } from "./sdds/types";
-import { TserverInfo, TjsTimeout } from "./types"
+import { TjsTimeout } from "./types"
 import Sockette from 'sockette';
 
 type TremoteServerStatus = "created"|"connected"|"reconnecting"|"closed"
