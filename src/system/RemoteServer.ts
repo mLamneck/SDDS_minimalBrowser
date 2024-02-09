@@ -152,7 +152,7 @@ class TconnectionList{
 }
 
 class TremoteServer extends TstructDescr{
-    private FserverInfo : TserverInfo
+    private Fhost : string
     private Fsocket : Sockette|undefined
     private Fstatus : TremoteServerStatus = "created"
     private FdataStruct : TstructDescr
@@ -170,15 +170,12 @@ class TremoteServer extends TstructDescr{
         this.Fstatus = _val
         this.emitOnChange()
     }
-    get info() { return this.FserverInfo }
-    get hostname() { return this.FserverInfo.hostname }
-    get port() { return this.FserverInfo.port }
 
-    constructor(info : TserverInfo){
-        super(`${info.hostname}`)
+    constructor(_host : string){
+        super(`${_host}`)
         this.FdataStruct = new TstructDescr("data")
         this.push(this.FdataStruct)
-        this.FserverInfo = info
+        this.Fhost = _host
         this.Fconns = new TconnectionList()
         this.connect()
         //const menuDefStr = '[{"type":1,"opt":0,"name":"cntSwitch","value":"on","enums":["on","off"]},{"type":1,"opt":0,"name":"Fcnt","value":5},{"type":66,"opt":0,"name":"sub","value":[{"type":1,"opt":0,"name":"filter","value":10},{"type":36,"opt":0,"name":"value21","value":7.50},{"type":4,"opt":0,"name":"time1","value":1000},{"type":1,"opt":0,"name":"led","value":"off","enums":["on","off"]}]},{"type":1,"opt":0,"name":"filter","value":10},{"type":36,"opt":0,"name":"value","value":0.00},{"type":36,"opt":0,"name":"fValue","value":0.00}]'
@@ -257,13 +254,13 @@ class TremoteServer extends TstructDescr{
         console.log("trigger checkActivation")
         this.FcheckActivateTimer = setTimeout(()=>{this._checkActivate()},100)
     }
-
+    
     installUpdateObservers(){
         this.FdataStruct.iterate((element,path)=>{
             if (!element.isStruct){
                 element.observers.add(item=>{
-                    if (!this.FupdatesDisabled)
-                        this.send(path.join('.') + '=' + item.value)
+                    if (!this.FupdatesDisabled) 
+                        this.send(path.join('.') + '=' + item.value)    //toDo: debounce?
                 })
             }
         })
@@ -403,15 +400,15 @@ class TremoteServer extends TstructDescr{
         this.send("T")
     }
 
-    getWsAdrr() {return `ws://${this.hostname}:${this.port}/ws`}
+    getWsAdrr() {return `ws://${this.Fhost}/ws`}
 
     connect(){
         console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Try to connect to WebSocket")
         if (this.Fsocket !== undefined) this.Fsocket.close()
 
         //const addr = `ws://192.168.178.68/ws`
-        const addr = `ws://192.168.4.1/ws`
-
+        //const addr = `ws://192.168.4.1/ws`
+        const addr = this.getWsAdrr()
         console.log("open websocket ... ",addr)
 
         const ws = new Sockette(addr, {
@@ -433,22 +430,6 @@ class TremoteServer extends TstructDescr{
 
     cleanup(){
         this.close()
-    }
-}
-
-export class TremoteServerList extends TstructDescr{
-    get servers() { return this.Fvalue as TremoteServer[] }
-
-    indexOf(_server : TserverInfo){
-        return this.servers.findIndex(s=>(s.hostname===_server.hostname&&s.port===_server.port))
-    }
-
-    add(_server : TserverInfo){
-        console.log("server",_server)
-        if (this.indexOf(_server) >= 0) throw new Error("server already exists")
-        const s = new TremoteServer(_server)
-        this.push(s)
-        return s
     }
 }
 

@@ -28,13 +28,14 @@ function MenuItemValue({item} : TmenuItemValueProps) {
     }
 
     function onEditDone(){
+        console.log("MenuItemValue call cancelEdit2")
         nav.editCanceled()
         observer.current.setActive(true)
     }
 
     function onFinishEdit(value: any){
+        console.log("MenuItemValue onFinishEdit")
         onCancelEdit()
-        console.log("MenuItemValue. onFinishEdit",value)
         item.setValue(value)
     }
 

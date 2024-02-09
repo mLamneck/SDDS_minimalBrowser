@@ -23,6 +23,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "react-select": "^5.8.0",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vite-plugin-singlefile": "^1.0.0"
   }
 }

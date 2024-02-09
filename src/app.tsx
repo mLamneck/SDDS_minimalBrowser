@@ -12,15 +12,13 @@ function Status({server} : {server : TremoteServer}){
 
 export function App() {
   console.log("render app")
+  const host = window.location.host
   console.log(window.location)
 
-  const [server, ] = useState(new TremoteServer({
-    hostname: 'localhost',
-    port: 8000,
-  }))
+  const [server, ] = useState(new TremoteServer(window.location.host))
 
-  const struct = useCreateLocalMenuHook()
-  //const struct = server
+  //const struct = useCreateLocalMenuHook()
+  const struct = server
   return (
     <>
       <ErrorBoundary>
@@ -29,6 +27,8 @@ export function App() {
           : null
         }
         <Status server={server}></Status>
+        <br></br>
+        <span>host={host}</span>
       </ErrorBoundary>
     </>
   )

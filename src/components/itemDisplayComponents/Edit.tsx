@@ -22,10 +22,12 @@ function Edit({item, editing, onEditStarted, onCancelEdit, onEditDone, onFinishE
     }
 
     function onKeyDown(e : KeyboardEvent){
-        console.log(`Edit onKeyDown`,e)
         switch(e.code){
             case "Escape": case "ArrowLeft": return cancelEdit()
-            case "Enter": onFinishEdit(ref.current?.value)
+            case "Enter": {
+                onFinishEdit(ref.current?.value)
+                e.preventDefault()  //prevent trigger onSubmit...
+            }
         }
     }
     
@@ -47,6 +49,7 @@ function Edit({item, editing, onEditStarted, onCancelEdit, onEditDone, onFinishE
         //information about the pressed key on mobiles in PREACT, so we are killing 2 birds with one 
         //stone here...
         <form onSubmit={(e)=>{
+            console.log("Edit.tsx: onSubmit")
             onFinishEdit(ref.current?.value)
             e.preventDefault()
         }}>
