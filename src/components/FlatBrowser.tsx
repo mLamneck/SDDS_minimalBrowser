@@ -1,4 +1,4 @@
-import { useRerenderOnValueChange } from "../hooks/useRegisterValueChangeCallback"
+import { useObserver } from "../hooks/useObserver"
 import { TstructDescr } from "../system/sdds/types"
 import MenuItemList from "./MenuItemList"
 import MenuNavProvider, { useMenuNavContext } from "./MenuNavContext"
@@ -9,7 +9,7 @@ type TflatBrowserProps = {
 
 function Status() {
   const nav = useMenuNavContext()
-  useRerenderOnValueChange(nav.status)
+  useObserver(nav.status)
 
   return (
     <div>status = {nav.status.value}</div>

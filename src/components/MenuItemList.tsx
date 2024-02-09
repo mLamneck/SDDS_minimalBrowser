@@ -1,4 +1,4 @@
-import { useRerenderOnValueChange } from "../hooks/useRegisterValueChangeCallback";
+import { useObserver } from "../hooks/useObserver"
 import MenuItemRow from "./MenuItemRow"
 import { useMenuNavContext } from "./MenuNavContext"
 
@@ -6,7 +6,7 @@ function MenuItemList() {
     const nav = useMenuNavContext()
     const struct = nav.struct
 
-    useRerenderOnValueChange(struct)
+    useObserver(struct)
     return <>
         <div className={"verticalContainer"}>
             {

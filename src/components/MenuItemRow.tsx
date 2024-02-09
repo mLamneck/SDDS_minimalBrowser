@@ -1,9 +1,9 @@
 import { useMenuNavContext } from "./MenuNavContext"
-import { useRerenderOnValueChange } from "../hooks/useRegisterValueChangeCallback"
 import { Tdescr } from "../system/sdds/types"
 import "../styles.css"
 import useFocusHtmlElement from "../hooks/useFocusHtmlElement"
 import MenuItemValue from "./MenuItemValue"
+import { useObserver } from "../hooks/useObserver"
 
 type TmenuItemRowProps = {
     item: Tdescr,
@@ -14,8 +14,8 @@ function MenuItemRow(props: TmenuItemRowProps) {
     //console.log(`render MenuItemRow ${item.name}`)
     
     const nav = useMenuNavContext()
-    useRerenderOnValueChange(nav.focusedRow)
-    useRerenderOnValueChange(nav.editing)
+    useObserver(nav.focusedRow)
+    useObserver(nav.editing)
 
     const focus =  nav.focusedRow.value === item.idx && nav.editing.value === 0
 

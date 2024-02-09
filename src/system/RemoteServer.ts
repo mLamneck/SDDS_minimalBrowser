@@ -261,7 +261,7 @@ class TremoteServer extends TstructDescr{
     installUpdateObservers(){
         this.FdataStruct.iterate((element,path)=>{
             if (!element.isStruct){
-                element.registerOnChangeCallback(item=>{
+                element.observers.add(item=>{
                     if (!this.FupdatesDisabled)
                         this.send(path.join('.') + '=' + item.value)
                 })
@@ -368,7 +368,7 @@ class TremoteServer extends TstructDescr{
         }
     }
 
-    onOpen(_ev : Event){
+    onOpen(){
         console.log("connected")
         this.status = "connected"
         this.requestTypes()
@@ -378,7 +378,7 @@ class TremoteServer extends TstructDescr{
         this.triggerConnectionThread(100)
     }
 
-    onClose(_ev : Event){
+    onClose(){
         console.log("closed")
         this.status = "closed"
     }
@@ -417,11 +417,11 @@ class TremoteServer extends TstructDescr{
         const ws = new Sockette(addr, {
             timeout: 5e3,
             //maxAttempts: 100,
-            onopen: e=>{this.onOpen(e)},
-            onmessage: e=>{this.onMessage(e)},
-            onreconnect: e => {this.onReconnecting()},
+            onopen: () => this.onOpen(),
+            onmessage: e => this.onMessage(e),
+            onreconnect: () => {this.onReconnecting()},
             onmaximum: e => console.log('Stop Attempting!', e),
-            onclose: e=> this.onClose(e),
+            onclose: () => this.onClose(),
             onerror: e => console.log('Error1:', e)
         });
         this.Fsocket = ws

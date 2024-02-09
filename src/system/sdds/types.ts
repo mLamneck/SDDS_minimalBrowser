@@ -1,11 +1,5 @@
 //import { signal } from "@preact/signals";
 
-export type OnChangeCallback = (sender : Tdescr) => void
-type Tobserver = {
-    tag : number
-    cb : OnChangeCallback
-}
-
 export type BaseDataTypes = "int"|"uint"|"float"|"enum"|"struct"|"invalid"
 
 // interface Testament{
@@ -18,28 +12,35 @@ export type BaseDataTypes = "int"|"uint"|"float"|"enum"|"struct"|"invalid"
 //     console.log(testament)
 // });
 
-export type TobserverCb = () => void;
+export type TobserverCb = (item: Tdescr) => void;
 
-export class TobserverObj{
-    Fcb : TobserverCb; 
-    Factive : boolean = true;
+export class Tobserver{
+    private Fcb : TobserverCb; 
+    private Factive : boolean = true;
+    private Fitem : Tdescr;
 
     get cb() { return this.Fcb; }
 
     setActive(_val : boolean) { this.Factive = _val}
     notify(){
-        if (this.Factive) this.Fcb()
+        if (this.Factive) this.Fcb(this.Fitem)
         else console.log("not active")
     }
 
-    constructor(_cb : TobserverCb){
+    constructor(_item: Tdescr, _cb : TobserverCb){
+        this.Fitem = _item
         this.Fcb = _cb;
     }
 }
 
 class TObserverList{
-    private Fobservers : TobserverObj[] = []
+    private Fobservers : Tobserver[] = []
+    private Fitem : Tdescr;
     
+    get length() { return this.Fobservers.length; }
+
+    constructor(_item : Tdescr){ this.Fitem = _item}
+
     findByCb(_cb : TobserverCb){
         let idx;
         this.Fobservers.forEach((o,_idx)=>{
@@ -53,15 +54,17 @@ class TObserverList{
 
     add(_cb : TobserverCb) {
         if (this.findByCb(_cb)) return;
-        const observer = new TobserverObj(_cb)
+        const observer = new Tobserver(this.Fitem,_cb)
         this.Fobservers.push(observer)
+        this.Fitem.parent?.checkActivation()
         return observer
     }
 
-    remove(_observer : TobserverObj|undefined){
+    remove(_observer : Tobserver|undefined){
         if (!_observer) return
         const idx = this.Fobservers.indexOf(_observer)
         if (idx >= 0) this.Fobservers.splice(idx,1)
+        this.Fitem.parent?.checkActivation()
     }
 
     notify(){ 
@@ -137,8 +140,7 @@ export class Tdescr{
 
     protected Fparent : TstructDescr|null = null
     private Fidx : number = -1
-    private Fobservers: Tobserver[] = []
-    private FobserverList = new TObserverList;
+    private FobserverList : TObserverList;
     get observers() { return this.FobserverList }
 
     get parent() : (TstructDescr|null) { return this.Fparent }
@@ -209,35 +211,11 @@ export class Tdescr{
 
     toString(){ return this.Fvalue.toString() }
 
-    findObserver(_cb : OnChangeCallback){
-        return this.Fobservers.findIndex(o=>o.cb===_cb)
-    }
-
-    // registerObserver(_o : TobservedItem){
-    //     return _o
-    // }
-
-    registerOnChangeCallback(_cb : OnChangeCallback){
-        const idx = this.findObserver(_cb)
-        if (idx > -1) return
-        this.Fobservers.push({cb:_cb, tag:0})
-        //console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX registerOnChangeCallback XXXXXXXXXXXXXXX ",this.onChangeCbs)
-        this.parent?.checkActivation()
-    }
-
-    unregisterOnChangeCallback(_cb : OnChangeCallback){
-        const idx = this.findObserver(_cb)
-        if (idx > -1) this.Fobservers.splice(idx,1)
-        else console.log("unregister failed")
-        this.parent?.checkActivation()
-    }
-
     get isObserved(){ 
-        return this.Fobservers.length > 1 
+        return this.FobserverList.length > 1 
     }
 
     emitOnChange(){
-        this.Fobservers.forEach(o=>o.cb(this))
         this.FobserverList.notify()
     }
 
@@ -253,6 +231,7 @@ export class Tdescr{
     }
 
     constructor(_name : string = ""){
+        this.FobserverList = new TObserverList(this)
         this.Ftype = Tdescr.type_struct
         //this.FsigVal = signal(0);
         this.Fname = _name
@@ -331,7 +310,7 @@ export class TstructDescr extends Tdescr{
    
     getValue() { return this.isEmpty?"NULL":">" }
 
-    setValue(value : any){
+    setValue(){
         //nobody is allowed to write to Fvalue
     }
 

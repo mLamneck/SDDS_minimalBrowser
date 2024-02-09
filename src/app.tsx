@@ -2,11 +2,11 @@ import { useState } from "preact/hooks"
 import ErrorBoundary from "./components/ErrorBoundary"
 import FlatBrowser from "./components/FlatBrowser"
 import useCreateLocalMenuHook from "./hooks/useCreateLocalMenuHook"
-import { useRerenderOnValueChange } from "./hooks/useRegisterValueChangeCallback"
 import TremoteServer from "./system/RemoteServer"
+import { useObserver } from "./hooks/useObserver"
 
 function Status({server} : {server : TremoteServer}){
-  useRerenderOnValueChange(server)
+  useObserver(server)
   return <span>wsStatus = { server.status }</span>
 }
 
