@@ -8,11 +8,12 @@ function Select({item, editing, onFinishEdit, onEditStarted, onCancelEdit}: TCom
 
     return (
         <div>
-            <select 
+            <select
+                className={item.readonly?'readonly':''}
+                disabled={item.readonly}
                 value={item.toString()}
-                className={"editField selectField"}
                 onFocus={onEditStarted}
-                onKeyDown={e=>{if (e.key === "Escape") onCancelEdit()}}
+                onKeyDown={e=>{if (e.key==="Escape" || e.key==="ArrowLeft") onCancelEdit()}}
                 onChange={e=>onFinishEdit(e.currentTarget.value)}
                 ref={ref}
             >

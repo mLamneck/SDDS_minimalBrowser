@@ -1,6 +1,7 @@
 import { useObserver } from "../hooks/useObserver"
 import { Tdescr } from "../system/sdds/types"
 import { useMenuNavContext } from "./MenuNavContext"
+import { TCommonProps } from "./itemDisplayComponents/CommonProps"
 import Edit from "./itemDisplayComponents/Edit"
 import Select from "./itemDisplayComponents/Select"
 
@@ -39,10 +40,9 @@ function MenuItemValue({item} : TmenuItemValueProps) {
         item.setValue(value)
     }
 
-    const commonProps = {
+    const commonProps : TCommonProps = {
         item,
         editing,
-        value,
 
         setValue,
         onStartEdit: ()=>{},
@@ -54,6 +54,7 @@ function MenuItemValue({item} : TmenuItemValueProps) {
 
     //how does this work in jsx below? #1
     //const test = {...commonProps, item: item as TenumDescr}
+
     switch(item.baseType){
         case 'enum': 
             return <Select {...commonProps}></Select>

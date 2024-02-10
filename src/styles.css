@@ -1,80 +1,63 @@
-.border {
-    border: solid1;
+/*  Setting a padding will not affect the size of the box. 
+    Without boder-box padding increases the size of an 
+    element */
+*,
+*::before,
+*::after{
+    box-sizing: border-box;
 }
 
-.verticalContainer{
-    display: flex;
-    flex-direction: column;
+.itemList-layout-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
 }
 
-.centerDiv{
-    display: flex;
-    justify-content: center;
-}
+input, select{
+    width: 100%;
+    text-wrap: nowrap;
 
-.centerElement {
-    justify-content: center;
-}
-
-.backButton {
-    margin-top: 10px;
-    border-radius: 5px;
-    height: 30px;
-    border:none;
-    border-radius:10px;
-    color: #1565c0;
-    font-weight: 400;
-    font-size: 1rem;
-    font-family: "Roboto","Helvetica","Arial",sans-serif;
-}
-
-.backButton:hover {
-    background-color: aqua;
-}
-
-.editRow {
-    /* border: dashed; */
-    padding:2px;
-    margin: 2px;
-    display: flex;
-    justify-content: center;
-}
-
-.readonly {
-    color : grey;
-}
-
-.editField {
-    background-color: inherit;
-
-    margin-left: 8px;
-    margin-bottom: 8px;
     font-weight: 400;
     font-size: 1rem;
     font-family: "Roboto","Helvetica","Arial",sans-serif;
 
-    border: none;
-    border-bottom: solid 1px;
     outline: none;
-    border-bottom-color: black;
-    width: 150px;
-    margin-right: 5px;
+    border: none;
+    border-bottom: solid 2px;
+    border-bottom-color: #20202097;
+
+    padding: 8px;
+
+    background-color: white;
+    border-radius: 2px;
 }
 
-.textEditField {
-    height: 15px;
-    padding-bottom: 10px;
-}
-
-.selectField {
-    padding: 8px; 
-}
-
-select option{
-    background-color: inherit;
-}
-
-.editField:focus {
+input:focus, select:focus{
     border-bottom: solid 2px;
     border-color: #1565c0;
+}
+
+.card {
+    max-width: 600px;
+    min-width: 300px;
+
+    padding: 10px;
+    margin-inline: auto;
+
+    background-color: #F5F5F5;
+
+    border-radius: 8px;
+    box-shadow: 0 0.5rem 1.5rem rgb(0 5 100 / 0.3);
+}
+
+.arrow-left {
+    margin-block: 8px;
+    width: 0; 
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent; 
+    border-right:15px solid #404040; 
+}
+
+.readonly{
+    color: #888;
 }

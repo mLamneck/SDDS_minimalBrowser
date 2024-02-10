@@ -8,7 +8,7 @@ function MenuItemList() {
 
     useObserver(struct)
     return <>
-        <div className={"verticalContainer1"}>
+        <div className={"itemList-layout-grid"}>
             {
             struct.childs.map((c)=>{
                 return <MenuItemRow 
@@ -18,9 +18,7 @@ function MenuItemList() {
             })
             }
             {nav.isRoot ? null :
-                <div className={"centerDiv"}>
-                    <button className={"backButton"} onClick={()=>nav.leaveStruct()}>GoBack</button>
-                </div>
+                <div className="arrow-left" onClick={()=>nav.leaveStruct()}/>
             }
         </div>
     </>

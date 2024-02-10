@@ -54,7 +54,7 @@ function Edit({item, editing, onEditStarted, onCancelEdit, onEditDone, onFinishE
             e.preventDefault()
         }}>
             <input 
-                className={`editField textEditField ${item.readonly?'readonly':''}`} 
+                className={item.readonly?'readonly':''} 
                 type={type} 
                 name={item.name}
                 value={item.value}

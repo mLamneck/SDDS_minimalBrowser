@@ -35,7 +35,7 @@ function MenuItemRow(props: TmenuItemRowProps) {
     const ref = useFocusHtmlElement(focus)
     
     return (
-        <div className={"editRow"}>
+        <>
             <input 
                 spellCheck={false} 
                 readOnly={true} 
@@ -48,7 +48,7 @@ function MenuItemRow(props: TmenuItemRowProps) {
                 ref={ref}
             />
             <MenuItemValue item={item}></MenuItemValue>
-        </div>
+        </>
     )
 }
 

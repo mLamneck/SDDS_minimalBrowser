@@ -6,6 +6,6 @@ import { viteSingleFile } from "vite-plugin-singlefile"
 export default defineConfig({
   plugins: [preact(), viteSingleFile()],
   esbuild: {
-    //drop: ['console', 'debugger'],
+    drop: ['console', 'debugger'],
   },
 })
