@@ -67,8 +67,11 @@
 }
 
 .selectField {
-    padding: 8px;
-    background-color: white;
+    padding: 8px; 
+}
+
+select option{
+    background-color: inherit;
 }
 
 .editField:focus {

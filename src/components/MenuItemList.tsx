@@ -8,7 +8,7 @@ function MenuItemList() {
 
     useObserver(struct)
     return <>
-        <div className={"verticalContainer"}>
+        <div className={"verticalContainer1"}>
             {
             struct.childs.map((c)=>{
                 return <MenuItemRow 

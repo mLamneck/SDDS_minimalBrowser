@@ -5,14 +5,15 @@ import useCreateLocalMenuHook from "./hooks/useCreateLocalMenuHook"
 import TremoteServer from "./system/RemoteServer"
 import { useObserver } from "./hooks/useObserver"
 
-function Status({server} : {server : TremoteServer}){
+function Status({server, host} : {server : TremoteServer, host : string}){
   useObserver(server)
-  return <span>wsStatus = { server.status }</span>
+  return <div>
+  <span>wsStatus = { server.status }</span>
+  </div>
 }
 
 export function App() {
   console.log("render app")
-  const host = window.location.host
   console.log(window.location)
 
   const [server, ] = useState(new TremoteServer(window.location.host))
@@ -26,9 +27,7 @@ export function App() {
           <FlatBrowser struct={struct} />
           : null
         }
-        <Status server={server}></Status>
-        <br></br>
-        <span>host={host}</span>
+        {/* <Status server={server} host={host}></Status> */}
       </ErrorBoundary>
     </>
   )

@@ -16,11 +16,29 @@ function Status() {
   )
 }
 
+const wrapperStyle = {
+  display: "flex",
+  justifyContent: "center",
+}
+
+const cardStyle = {
+  width: "auto",
+  marginBlock: "20px",
+  paddingTop: "10px",
+  backgroundColor: "#F5F5F5",
+  borderRadius: "8px",
+  boxShadow:"0 0.5rem 1.5rem rgb(0 5 100 / 0.3)"
+}
+
 function FlatBrowser({struct} : TflatBrowserProps) {
   return (
     <MenuNavProvider root={struct}>
-        <MenuItemList/>
-        <Status></Status>
+        <div style={wrapperStyle}>
+          <div style={cardStyle}>
+            <MenuItemList/>
+            {/* <Status></Status> */}
+          </div>
+        </div>
     </MenuNavProvider>
   )
 }

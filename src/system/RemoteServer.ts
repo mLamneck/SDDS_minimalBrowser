@@ -406,9 +406,9 @@ class TremoteServer extends TstructDescr{
         console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Try to connect to WebSocket")
         if (this.Fsocket !== undefined) this.Fsocket.close()
 
-        //const addr = `ws://192.168.178.68/ws`
         //const addr = `ws://192.168.4.1/ws`
-        const addr = this.getWsAdrr()
+        //const addr = this.getWsAdrr()
+        const addr = `ws://192.168.178.68/ws`
         console.log("open websocket ... ",addr)
 
         const ws = new Sockette(addr, {
