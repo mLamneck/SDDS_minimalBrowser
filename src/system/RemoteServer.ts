@@ -266,20 +266,28 @@ class TremoteServer extends TstructDescr{
         })
     }
 
-    static LINK_MSG_PATTERN = /^\s*(\d+)\s+(\d+)\s+(.+)/
-    handleLinkMessage(data : string){
-        //console.log(`handleLinkMessage "${data}" last=${data.slice(-1)}`)
+    static LINK_MSG_PATTERN = /^(\d+)\s+(.+)/
+    handleLinkMessage(port : number, data : string){
+        console.log(`handleLinkMessage port=${port} data="${data}"}`)
 
         //remove seperator at the end (this is a bug in my ssds lib in C++)
-        if (data.slice(-1) === ",") data=data.slice(0,-1)
+        //if (data.slice(-1) === ",") data=data.slice(0,-1)
 
         //split into port, firstItem, rest
+
         const match = data.match(TremoteServer.LINK_MSG_PATTERN)
+        console.log(match)
         if (!match) return
 
-        const port = parseInt(match[1])
-        const first = parseInt(match[2])
-        const values = match[3].split(",")
+        //const port = parseInt(match[1])
+        const first = parseInt(match[1])
+        let values;
+        try{
+            values = JSON.parse(match[2])
+        }
+        catch(err){
+            console.log("parsing json failed: " + err)
+        }
 
         console.log("handleLinkData data=",values)
 
@@ -297,23 +305,19 @@ class TremoteServer extends TstructDescr{
         }
     }
 
-    static UNLINK_MSG_PATTERN = /^\s*(\d+)/
-    handleUnlinkMessage(data : string){
-        const match = data.match(TremoteServer.UNLINK_MSG_PATTERN)
-        if (!match) return
-
-        this.Fconns.setToClosed(parseInt(match[1]))
+    handleUnlinkMessage(port : number){
+        this.Fconns.setToClosed(port)
     }
 
-    static ERR_MSG_PATTERN = /^\s*(\d+)\s+(\d+)(.*)/
-    handleErrorMessage(data : string){
+    static ERR_MSG_PATTERN = /^\s*(\d+)\s*(.*)/
+    handleErrorMessage(port: number, data : string){
         console.log(`handleErrorMessage data = "${data}"`)
         const match = data.match(TremoteServer.ERR_MSG_PATTERN)
         if (!match) return
 
-        //const port = parseInt(match[1])
-        const errCode = parseInt(match[2])
-        //const errDescr = match[3]
+        const errCode = parseInt(match[1])
+        const errDescr = match[2]
+        console.log(errDescr)
         //const conn = this.Fconns.findByPort(port)
         switch(errCode){
             //couldn't parse port -> nothing we can do about it
@@ -338,30 +342,36 @@ class TremoteServer extends TstructDescr{
         }
     }
 
-    handleTypeMessage(data : string){
+    handleTypeMessage(port : number, data : string){
         //toDo! check if struct already exists, compare
         if (this.FdataStruct.childs.length === 0){
             this.FdataStruct.parseJsonStr(data)
+            this.FdataStruct.log()
             this.installUpdateObservers()
             this.emitOnChange()
         }
     }
 
+    static MSG_PATTERN = /([a-z,A-Z])\s(\d+)\s?(.*)/
     onMessage(_ev : MessageEvent){
-        const data = _ev.data
-        //console.log('TremoteServer.onMessage!', data)
+        const input = _ev.data
+        console.log('TremoteServer.onMessage!', input)
 
         //split into cmd and payload
-        const idx = data.indexOf(" ")
-        if (idx < 0) return
-        const cmd = data.substring(0,idx)
-        const payload = data.substring(idx+1)
+        //console.log("parsing")
+        const match = input.match(TremoteServer.MSG_PATTERN)
+        //console.log(match)
+        if (!match) return
+
+        const cmd = match[1];
+        const port = parseInt(match[2]);
+        const data = match[3];
 
         switch(cmd){
-            case "l": return this.handleLinkMessage(payload)
-            case "u": return this.handleUnlinkMessage(payload)
-            case "E": return this.handleErrorMessage(payload)
-            case "t": return this.handleTypeMessage(payload)
+            case "l": return this.handleLinkMessage(port,data)
+            case "u": return this.handleUnlinkMessage(port)
+            case "E": return this.handleErrorMessage(port,data)
+            case "t": return this.handleTypeMessage(port,data)
         }
     }
 
@@ -406,9 +416,9 @@ class TremoteServer extends TstructDescr{
         console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Try to connect to WebSocket")
         if (this.Fsocket !== undefined) this.Fsocket.close()
 
+        const addr = this.getWsAdrr()
+        //const addr = `ws://192.168.178.68/ws`
         //const addr = `ws://192.168.4.1/ws`
-        //const addr = this.getWsAdrr()
-        const addr = `ws://192.168.178.68/ws`
         console.log("open websocket ... ",addr)
 
         const ws = new Sockette(addr, {
