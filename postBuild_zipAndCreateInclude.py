@@ -1,7 +1,7 @@
 import gzip
 import os
 
-outName = "C:/Dropbox/projects/sdds/Arduino/webSocket/site_browserHtml.hex.h"
+outName = "C:/Dropbox/projects/sdds/SDDS_ESP_Extension/src/site_browserHtml.hex.h"
 
 _filename = "index.html"
 inName = 'dist/' + _filename
