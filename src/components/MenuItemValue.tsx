@@ -58,9 +58,8 @@ function MenuItemValue({item} : TmenuItemValueProps) {
     switch(item.baseType){
         case 'enum': 
             return <Select {...commonProps}></Select>
-        case 'int': case 'uint' : case 'float' : case 'struct': 
+        default:
             return <Edit {...commonProps}></Edit>
-        default: 
     }
     return <></>
 }

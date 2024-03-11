@@ -1,6 +1,6 @@
 //import { signal } from "@preact/signals";
 
-export type BaseDataTypes = "int"|"uint"|"float"|"enum"|"struct"|"invalid"
+export type BaseDataTypes = "int"|"uint"|"float"|"enum"|"struct"|"time"|"string"|"invalid"
 
 // interface Testament{
 //     id: number,
@@ -81,6 +81,7 @@ export class Tdescr{
     static type_uint        = 0x00
     static type_int         = 0x10
     static type_float       = 0x20
+    static type_enum        = 0x30
     static type_composed    = 0x40
     
     //unsigned integers
@@ -98,9 +99,15 @@ export class Tdescr{
     //floating point types
     static type_float32     = Tdescr.type_float | 0x04
     static type_float64     = Tdescr.type_float | 0x08
+
+    static type_enum8       = Tdescr.type_enum | 0x01
+
+    static type_time        = 0x06
     
     //composed types
     static type_struct      = Tdescr.type_composed | 0x02
+
+    static type_string      = 0x81;
 
     //option definition
     static opt = {
@@ -150,8 +157,9 @@ export class Tdescr{
     get typeId() { return this.Ftype}
     get type() { return (this.Ftype & 0xF0) }
     get baseType() : BaseDataTypes{
-        if (this instanceof TenumDescr) return "enum"
+        if (this.typeId == Tdescr.type_string) return "string";
         switch(this.type){
+            case Tdescr.type_enum: return "enum"
             case Tdescr.type_int: return "int"
             case Tdescr.type_uint: return "uint"
             case Tdescr.type_float: return "float"
@@ -237,6 +245,9 @@ export class Tdescr{
         this.Fname = _name
         this.id = Tdescr.objCnt++
     }
+
+}
+class TstringDescr extends Tdescr{
 
 }
 
@@ -459,9 +470,8 @@ function createDescr(_descr : any) : Tdescr{
 
     function _create() : Tdescr{
         switch(_descr.type){
-            case Tdescr.type_uint8:
-                if (_descr.hasOwnProperty(Tdescr.json_enumKey)) return new TenumDescr(_descr) 
-                return new TnumberDescr()
+            case Tdescr.type_uint8: return new TnumberDescr()
+        
             case Tdescr.type_uint16: return new TnumberDescr()
             case Tdescr.type_uint32: return new TnumberDescr()
             case Tdescr.type_uint64: return new TnumberDescr()
@@ -474,7 +484,11 @@ function createDescr(_descr : any) : Tdescr{
             case Tdescr.type_float32: return new TnumberDescr()
             case Tdescr.type_float64: return new TnumberDescr()
 
+            case Tdescr.type_enum8: return new TenumDescr(_descr) 
+
             case Tdescr.type_struct: return new TstructDescr(_descr)
+
+            case Tdescr.type_string: return new TstringDescr(_descr)
         }
         throw Error(`invalid type ${_descr.type}`)
     }

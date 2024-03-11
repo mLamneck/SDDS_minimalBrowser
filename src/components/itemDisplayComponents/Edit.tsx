@@ -36,12 +36,10 @@ function Edit({item, editing, onEditStarted, onCancelEdit, onEditDone, onFinishE
         if (ref.current) ref.current.value = item.value
     }
 
-    let type = "number"
-    //let disabled = false
-    if (item.isStruct){
-        type = "text"
-        //disabled = (item as TstructDescr).isEmpty
-    }
+    let type = "text"
+    if (item.baseType == "float" || item.baseType == "int" || item.baseType == "uint"){
+        type = "number"
+    } 
 
     return (
         //for mobiles devices (only android?) the form tag is necessary to show the enter button

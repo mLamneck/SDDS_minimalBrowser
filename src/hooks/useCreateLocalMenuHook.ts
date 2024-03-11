@@ -13,17 +13,19 @@ function useCreateLocalMenuHook(){
         let menuDefStr = `[
         {"type":1, "name": "byte", "opt":1, "value": 1}
         ,{"type":2, "name": "word", "opt":1, "value": 2}
-        ,{"type":1, "name": "action", "opt":0, "value": 0, "enums": ["___","open","close","emergency"]}
-        ,{"type":1, "name": "actionROandAprettyLongName", "opt":1, "value": 0, "enums": ["___","cooldown","warmup"]}
+        ,{"type":49, "name": "action", "opt":0, "value": 0, "enums": ["___","open","close","emergency"]}
+        ,{"type":49, "name": "actionROandAprettyLongName", "opt":1, "value": 0, "enums": ["___","cooldown","warmup"]}
         ,{"type":66, "name": "settings", "opt":0, "value": [
           {"type":1, "name": "filter", "opt":0, "value": 10}
           ,{"type":66, "name": "sub", "opt":0, "value": [
             {"type":1, "name": "byte", "opt":1, "value": 1}
           ]}
         ]}
+        ,{"type":1, "name": "time", "opt":0, "value": "10.10.2034 10:00:00"}
         ,{"type":2, "name": "last", "opt":0, "value": 2}
+        ,{"type":129, "name": "str", "opt":0, "value": "ein langer string"}
       ]`
-        menuDefStr = '[{"type":1,"opt":1,"name":"cntSwitchAprettyLongName","value":"on","enums":["on","off"]},{"type":1,"opt":1,"name":"Fcnt","value":5},{"type":66,"opt":0,"name":"sub","value":[{"type":1,"opt":0,"name":"filter","value":10},{"type":36,"opt":0,"name":"value21","value":7.50},{"type":4,"opt":0,"name":"time1","value":1000},{"type":1,"opt":0,"name":"led","value":"off","enums":["on","off"]}]},{"type":1,"opt":0,"name":"filter","value":10},{"type":36,"opt":0,"name":"value","value":0.00},{"type":36,"opt":0,"name":"fValue","value":0.00}]'
+        //menuDefStr = '[{"type":1,"opt":1,"name":"cntSwitchAprettyLongName","value":"on","enums":["on","off"]},{"type":1,"opt":1,"name":"Fcnt","value":5},{"type":66,"opt":0,"name":"sub","value":[{"type":1,"opt":0,"name":"filter","value":10},{"type":36,"opt":0,"name":"value21","value":7.50},{"type":4,"opt":0,"name":"time1","value":1000},{"type":1,"opt":0,"name":"led","value":"off","enums":["on","off"]}]},{"type":1,"opt":0,"name":"filter","value":10},{"type":36,"opt":0,"name":"value","value":0.00},{"type":36,"opt":0,"name":"fValue","value":0.00}]'
         struct.parseJsonStr(menuDefStr)
         console.log("settings struct")
         setStruct(struct)
