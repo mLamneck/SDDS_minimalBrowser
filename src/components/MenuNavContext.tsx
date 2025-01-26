@@ -1,4 +1,5 @@
 import { createContext, ComponentChildren } from "preact";
+import { useObserver } from "../hooks/useObserver"
 import { useContext } from "preact/hooks";
 import { TnumberDescr, Tdescr, TstructDescr } from "../system/sdds/types";
 

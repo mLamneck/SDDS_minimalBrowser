@@ -319,7 +319,11 @@ export class TstructDescr extends Tdescr{
     get isEmpty(){ return this.childs.length === 0 }
     get hasChilds(){ return !this.isEmpty }
    
-    getValue() { return this.isEmpty?"NULL":">" }
+	getValue() { return this.isEmpty?"NULL":">" }
+
+	clear(){
+		this.Fvalue = [];
+	}
 
     setValue(){
         //nobody is allowed to write to Fvalue

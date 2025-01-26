@@ -1,4 +1,5 @@
 import { TobservedItem, Tpath, TstructDescr } from "./sdds/types";
+import SerialConnector from "./SerialConnector"
 import { TjsTimeout } from "./types"
 import Sockette from 'sockette';
 
@@ -144,6 +145,10 @@ class TconnectionList{
         this.Flist[this.Flist.indexOf(conn)] = null
     }
 
+	clear(){
+		this.Flist = [];
+	}
+
     log(){
         console.log("-> log Connections XXXXXXXXXXXXXXXXXXXXXX")
         this.iterate(c => console.log(c))
@@ -153,7 +158,7 @@ class TconnectionList{
 
 class TremoteServer extends TstructDescr{
     private Fhost : string
-    private Fsocket : Sockette|undefined
+    private Fsocket : Sockette|SerialConnector|undefined
     private Fstatus : TremoteServerStatus = "created"
     private FdataStruct : TstructDescr
 
@@ -171,8 +176,11 @@ class TremoteServer extends TstructDescr{
         this.emitOnChange()
     }
 
+	private host = "";
+
     constructor(_host : string){
         super(`${_host}`)
+		this.host = _host;
         this.FdataStruct = new TstructDescr("data")
         this.push(this.FdataStruct)
         this.Fhost = _host
@@ -353,10 +361,7 @@ class TremoteServer extends TstructDescr{
     }
 
     static MSG_PATTERN = /([a-z,A-Z])\s(\d+)\s?(.*)/
-    onMessage(_ev : MessageEvent){
-        const input = _ev.data
-        console.log('TremoteServer.onMessage!', input)
-
+    onMessageStr(input : string){
         //split into cmd and payload
         //console.log("parsing")
         const match = input.match(TremoteServer.MSG_PATTERN)
@@ -373,6 +378,12 @@ class TremoteServer extends TstructDescr{
             case "E": return this.handleErrorMessage(port,data)
             case "t": return this.handleTypeMessage(port,data)
         }
+	}
+
+	onMessage(_ev : MessageEvent){
+        const input = _ev.data
+        console.log('TremoteServer.onMessage!', input)
+		this.onMessageStr(input)
     }
 
     onOpen(){
@@ -413,26 +424,55 @@ class TremoteServer extends TstructDescr{
     getWsAdrr() {return `ws://${this.Fhost}/ws`}
 
     connect(){
-        console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Try to connect to WebSocket")
         if (this.Fsocket !== undefined) this.Fsocket.close()
 
-        const addr = this.getWsAdrr()
-        //const addr = `ws://192.168.178.68/ws`
-        //const addr = `ws://192.168.4.1/ws`
-        console.log("open websocket ... ",addr)
+		if (this.host){
+	        console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Try to connect to WebSocket")
+			const addr = this.getWsAdrr()
+			//const addr = `ws://192.168.178.68/ws`
+			//const addr = `ws://192.168.4.1/ws`
+			console.log("open websocket ... ",addr)
+	
+			const ws = new Sockette(addr, {
+				timeout: 5e3,
+				//maxAttempts: 100,
+				onopen: () => this.onOpen(),
+				onmessage: e => this.onMessage(e),
+				onreconnect: () => {this.onReconnecting()},
+				onmaximum: e => console.log('Stop Attempting!', e),
+				onclose: () => this.onClose(),
+				onerror: e => console.log('Error1:', e)
+			});
+			this.Fsocket = ws	
+		} else{
+			const serial = new SerialConnector(
+				() => this.onOpen(),
+				(data) => this.onMessageStr(data),
+				() => console.log("Reconnecting..."),
+				() => console.log("Serial connection closed"),
+				(error) => console.error("Error:", error)
+			);
+			this.Fsocket = serial;
+		}
 
-        const ws = new Sockette(addr, {
-            timeout: 5e3,
-            //maxAttempts: 100,
-            onopen: () => this.onOpen(),
-            onmessage: e => this.onMessage(e),
-            onreconnect: () => {this.onReconnecting()},
-            onmaximum: e => console.log('Stop Attempting!', e),
-            onclose: () => this.onClose(),
-            onerror: e => console.log('Error1:', e)
-        });
-        this.Fsocket = ws
     }
+
+	async connectSerial(){
+		if (this.Fsocket instanceof SerialConnector) {
+			return await this.Fsocket.connect();
+		}
+		return false;
+	}
+
+	closeSerial(){
+		if (this.Fsocket instanceof SerialConnector) {
+			this.Fsocket.close();
+			this.FdataStruct.clear();
+			this.Fconns.clear();
+			if (this.FconnTimer) clearTimeout(this.FconnTimer)
+			this.FdataStruct.emitOnChange();
+		}
+	}
 
     close(){
         this.Fsocket?.close()

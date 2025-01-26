@@ -1,9 +1,10 @@
 import gzip
 import os
-
-outName = "C:/Dropbox/projects/sdds/SDDS_ESP_Extension/src/site_browserHtml.hex.h"
+import shutil
+from datetime import datetime
 
 _filename = "index.html"
+outName = "site_browserHtml.hex.h"
 inName = 'dist/' + _filename
 zipName = _filename + '.zip'
 
@@ -25,4 +26,8 @@ while c:
 f_out.close()
 f_in.close()
 
+datum = datetime.now().strftime('%Y%m%d')
+shutil.copy(inName, os.path.join("release",f"sddsMinimalBrowser.html"))
+shutil.copy(inName, os.path.join("release",f"{datum}_sddsMinimalBrowser.html"))
+shutil.copy(outName, os.path.join("release",f"{datum}_{outName}"))
 os.remove(zipName)

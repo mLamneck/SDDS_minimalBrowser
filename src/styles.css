@@ -13,6 +13,26 @@
     gap: 0.5rem;
 }
 
+.flex-center-container{
+    max-width: 600px;
+    min-width: 300px;
+    padding: 10px;
+    margin-inline: auto;
+	display: flex;
+    justify-content: center;
+}
+
+button{
+	border-radius: 8px;	
+    border-color: #20202097;
+	background-color: #F5F5F5;
+	height: 30px;
+}
+
+button:hover {
+    background-color: #e0e0e0;
+}
+
 input, select{
     width: 100%;
     text-wrap: nowrap;
