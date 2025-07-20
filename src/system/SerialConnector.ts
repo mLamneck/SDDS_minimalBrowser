@@ -1,3 +1,5 @@
+import {IComm, CommCallbackManager } from "./CommInterface"
+
 declare global {
 	interface Navigator {
 		serial: Serial;
@@ -5,80 +7,40 @@ declare global {
 }
 
 interface SerialPort extends EventTarget {
-    open(options: SerialOptions): Promise<void>;
-    close(): Promise<void>;
-    readable: ReadableStream<Uint8Array> | null;
-    writable: WritableStream<Uint8Array> | null;
+	open(options: SerialOptions): Promise<void>;
+	close(): Promise<void>;
+	readable: ReadableStream<Uint8Array> | null;
+	writable: WritableStream<Uint8Array> | null;
 }
 
 interface SerialOptions {
-    baudRate: number;
-    dataBits?: number;
-    stopBits?: number;
-    parity?: "none" | "even" | "odd";
-    bufferSize?: number;
-    flowControl?: "none" | "hardware";
+	baudRate: number;
+	dataBits?: number;
+	stopBits?: number;
+	parity?: "none" | "even" | "odd";
+	bufferSize?: number;
+	flowControl?: "none" | "hardware";
 }
 
 interface Serial {
-    requestPort(options?: SerialPortRequestOptions): Promise<SerialPort>;
-    getPorts(): Promise<SerialPort[]>;
+	requestPort(options?: SerialPortRequestOptions): Promise<SerialPort>;
+	getPorts(): Promise<SerialPort[]>;
 }
 
 interface SerialPortRequestOptions {
-    filters?: SerialPortFilter[];
+	filters?: SerialPortFilter[];
 }
 
 interface SerialPortFilter {
-    usbVendorId?: number;
-    usbProductId?: number;
+	usbVendorId?: number;
+	usbProductId?: number;
 }
 
-/*
-class CustomTransformStream {
-    private transformStream: TransformStream<Uint8Array, Uint8Array>;
-
-    constructor(highWaterMark: number) {
-        this.transformStream = new TransformStream<Uint8Array, Uint8Array>(
-            {
-                transform(chunk, controller) {
-                    //console.log("data in TransformStream:", chunk);
-                    controller.enqueue(chunk);
-                }
-            },
-            // WritableStream Optionen
-            { highWaterMark },
-            // ReadableStream Optionen
-            { highWaterMark }
-        );
-    }
-
-    get stream() {
-        return this.transformStream;
-    }
-}
-*/
-/*
-const customStream = new CustomTransformStream(64 * 1024).stream;
-const readableStream = this.port.readable
-	?.pipeThrough(customStream)
-	?.pipeThrough(new TextDecoderStream());
-this.readableStreamClosePromise = readableStream;
-this.reader = readableStream?.getReader();
-*/
-
-export class SerialConnector {
-    private port?: SerialPort;
-    private reader?: ReadableStreamDefaultReader<string>;
-    private writer?: WritableStreamDefaultWriter<string>;
-
-    constructor(
-        private onOpen: () => void,
-        private onMessage: (data: string) => void,
-        private onReconnecting: () => void,
-        private onClose: () => void,
-        private onError: (error: Error) => void
-    ) {}
+export class SerialConnector implements IComm {
+	private port?: SerialPort;
+	private reader?: ReadableStreamDefaultReader<string>;
+	private writer?: WritableStreamDefaultWriter<string>;
+	public callbacks = new CommCallbackManager();
 
 	private readableStreamClosePromise : any;
 	private writeableStreamClosePromise : any;
@@ -99,22 +61,30 @@ export class SerialConnector {
 		this.closeReq = false;
 	}
 
-    async connect() {
+	async connect() {
 		if (this.port) return true;
-        try {
-            this.port = await navigator.serial.requestPort();
+		try {
+			this.port = await navigator.serial.requestPort();
+			console.log(this.port)
 
-            await this.port?.open({ baudRate: 115200, bufferSize:16777216 });
+			await this.port?.open({ baudRate: 115200, bufferSize:16777216 });
 
 			await this.initRead();
-            this.readLoop();
-            this.onOpen();
+			this.readLoop();
+			this.callbacks.emitOpen();
 			return true;
-        } catch (error) {
-            this.onError(error as Error);
-        }
-		return false
-    }
+		} catch (error) {
+			const errorMessage =
+			error instanceof Error
+				? error.message
+				: typeof error === 'string'
+				? error
+				: JSON.stringify(error);
+
+			this.callbacks.emitError(errorMessage);
+			throw errorMessage;		
+		}
+	}
 
 	private buffer : string = "";
 	private closeReq = false;
@@ -134,7 +104,7 @@ export class SerialConnector {
 						this.buffer += value;
 						const lines = this.buffer.split('\n');
 						this.buffer = lines.pop() || '';
-						lines.forEach(line => this.onMessage(line.trim()));
+						lines.forEach(line => this.callbacks.emitMessage(line.trim()));
 					}
 				}
 			} catch (error) {
@@ -155,11 +125,16 @@ export class SerialConnector {
 		}
 	}
 
+	async send(msg: string): Promise<void> {
+		if (!this.port || !this.writer) return Promise.resolve();
+		return this.writer.write(`${msg}\n`);
+	}
+
 	async close() {
 		if (!this.port) return;
-        try {
+		try {
 			this.closeReq = true;
-            this.reader?.cancel();
+			this.reader?.cancel();
 			await this.readableStreamClosePromise.catch(()=>{console.log("catch error")})
 
 			if (this.writer != undefined)
@@ -168,7 +143,7 @@ export class SerialConnector {
 				await this.writeableStreamClosePromise;	
 			}
 
-            await this.port?.close();
+			await this.port?.close();
 			
 			this.reader = undefined;
 			this.writer = undefined;
@@ -176,21 +151,12 @@ export class SerialConnector {
 			this.readableStreamClosePromise = undefined;
 			this.writeableStreamClosePromise = undefined;
 
-            this.onClose();
-        } catch (error) {
-            this.onError(error as Error);
-        }
-    }
-	
-    async send(msg: string) {
-		if (!this.port) return;
-		try {
-            console.log(`Sending: "${msg}"`);
-            await this.writer?.write(`${msg}\n`);
-        } catch (error) {
-            this.onError(error as Error);
-        }
-    }
-}
+			this.callbacks.emitClose();
+		} catch (error) {
+			this.callbacks.emitError(error);
+		}
 
-export default SerialConnector
+		this.callbacks.emitClose();
+	}
+	
+}

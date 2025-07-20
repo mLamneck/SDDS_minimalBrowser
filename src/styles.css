@@ -57,6 +57,10 @@ input:focus, select:focus{
     border-color: #1565c0;
 }
 
+.mt-8 {
+  margin-top: 2rem; /* 16px */
+}
+
 .card {
     max-width: 600px;
     min-width: 300px;
@@ -80,4 +84,63 @@ input:focus, select:focus{
 
 .readonly{
     color: #888;
+}
+
+.connection-status {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 12px;
+  padding: 8px 10px;
+
+  border-top: 1px solid #ddd;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.connection-status {
+  margin-top: 12px;
+  padding: 8px;
+  font-size: 0.9rem;
+  border-top: 1px solid #ccc;
+}
+
+.status-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap; /* verhindert Überlauf */
+}
+
+.status-label {
+  font-weight: bold;
+}
+
+.status-indicator {
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.status-indicator.connected {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-indicator.disconnected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.error-message {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 100%;
 }

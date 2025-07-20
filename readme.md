@@ -66,7 +66,7 @@ The *.html* file can run in a local browser and connect to a serial port, while 
 A local developement server can be started with the following command.
 
 ```sh
-npm run build
+npm run dev
 
 ➜  Local:   http://localhost:3000/
 ➜  Network: http://192.168.178.84:3000/

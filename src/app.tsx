@@ -1,51 +1,40 @@
-import { useState } from "preact/hooks"
+import { useState,useRef } from "preact/hooks"
 import ErrorBoundary from "./components/ErrorBoundary"
 import FlatBrowser from "./components/FlatBrowser"
 import useCreateLocalMenuHook from "./hooks/useCreateLocalMenuHook"
 import TremoteServer from "./system/RemoteServer"
 
-type TserialProps = {
-	server : TremoteServer,
-	rerender: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-function Serial(props: TserialProps){
-	const server = props.server;
-	const rerender = props.rerender;
-
-	const [connected, setConnected] = useState(false);
-
-	async function connect(){
-		if (await server.connectSerial()){
-			setConnected(true);
-		}
-	}
-	function close(){
-		server.closeSerial(); 
-		setConnected(false);
-		rerender(false)
-	}
-	return<>
-		<div className="flex-center-container">
-			{connected?
-					<div>
-					<button onClick={close}>Close</button>
-					</div>
-				:<div>
-					<button onClick={connect}>Connect to Serial Port</button>
-				</div>
-				}
-			</div>
-	</>	
-}
+/**
+ * Switch between builds for different communication channels:
+ *  - Serial
+ *  - WebSocket
+ *  - ParticleIO
+ *
+ * Each communication channel must provide:
+ *  1. A `xxxConnector.ts` file implementing the connection logic
+ *  2. A corresponding `xxxConnector.tsx` file implementing the UI
+ *
+ * Example:
+ *  - ParticleIO: requires input fields for device ID and access token
+ *  - Serial: requires buttons for connect/disconnect actions
+ *
+ * Currently, switching between communication channels is done manually
+ * by commenting/uncommenting the respective import blocks below.
+ */
+//import { ParticleComm as Comm } from './system/ParticleConnector'
+//import { ParticleConnectorGui as CommGui } from "./components/ParticleConnector"
+import { SerialConnector as Comm } from "./system/SerialConnector"
+import { SerialConnectorGui as CommGui } from "./components/SerialConnector"
+//import { WebsocketConnector as Comm } from "./system/WebsocketConnector"
+//import { WebsocketConnectorGui as CommGui } from "./components/WebsocketConnector"
 
 export function App() {
 	console.log("render app")
 	console.log(window.location)
 
+	const commRef = useRef<Comm>(new Comm);
 	const host = window.location.host;
-	const [server, ] = useState(new TremoteServer(host))
-	const [reconnect, setReconnect] = useState(true);
+	const [server, ] = useState(new TremoteServer(commRef.current,host))
 
 	//const struct = useCreateLocalMenuHook()
 	const struct = server
@@ -54,14 +43,15 @@ export function App() {
 	<>
 		<ErrorBoundary>
 		{struct ?
-			<FlatBrowser struct={struct} />
+			<div className="card">
+				<FlatBrowser struct={struct}>
+				</FlatBrowser>
+				<CommGui comm={commRef.current}></CommGui>
+			</div>
 			: null
 		}
-		{
-			host?
-			null: <Serial server={server} rerender={setReconnect}></Serial>
+		{/* <Status server={server} host={host}></Status> */
 		}
-		{/* <Status server={server} host={host}></Status> */}
 		</ErrorBoundary>
 	</>
 	)
