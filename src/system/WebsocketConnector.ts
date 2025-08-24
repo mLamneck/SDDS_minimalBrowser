@@ -8,8 +8,10 @@ export class WebsocketConnector implements IComm {
 	async connect() {
 		console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Try to connect to WebSocket")
 		let addr = `ws://${window.location.host}/ws`;
-		addr = `ws://192.168.178.37/ws`
-		//const addr = `ws://192.168.4.1/ws`
+		if (window.location.host === "localhost:3000"){
+			addr = `ws://192.168.4.1/ws`
+			console.warn("using fixed addr to reach out to ESP in dev mode ... ",addr)
+		}
 		console.log("open websocket ... ",addr)
 
 		const ws = new Sockette(addr, {

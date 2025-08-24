@@ -1,0 +1,2 @@
+python postBuild_staticPage.py
+pause
