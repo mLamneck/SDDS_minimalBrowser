@@ -35,7 +35,6 @@ export function App() {
 	const commRef = useRef<Comm>(new Comm);
 	const host = window.location.host;
 	const [server, ] = useState(new TremoteServer(commRef.current,host))
-
 	//const struct = useCreateLocalMenuHook()
 	const struct = server
 

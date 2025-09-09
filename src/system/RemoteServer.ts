@@ -4,13 +4,13 @@ import { IComm } from "./CommInterface";
 
 type TremoteServerStatus = "created"|"connected"|"reconnecting"|"closed"
 
-type TconnectionTask = "close"|"open"|"linked"
+type TconnectionTask = "close"|"open"|"linked"|"closeOpen"
 
 class Tconnection{
 	private Fstruct : TstructDescr|null
 	private Fpath : Tpath
 	private Fport : number
-	private Ftask : TconnectionTask
+	public Ftask : TconnectionTask
 	
 	get task() { return this.Ftask }
 	get pathStr(){ return this.Fpath.join('.') }
@@ -22,7 +22,7 @@ class Tconnection{
 	reactivate(_data : TobservedItem){
 		this.Fstruct = _data.struct;
 		this.Fpath = _data.path.slice()
-		this.Ftask = "open"
+		this.Ftask = "closeOpen"
 	}
 
 	onWsReconnect(){
@@ -139,9 +139,15 @@ class TconnectionList{
 
 	setToClosed(port : number){
 		const conn = this.findByPort(port)
-		if (!conn) return
-		if (conn.task !== "close") return
-		this.Flist[this.Flist.indexOf(conn)] = null
+		if (!conn) return null
+		if (conn.task === "close") {
+			this.Flist[this.Flist.indexOf(conn)] = null
+			return null
+		}
+		else if (conn.task === "closeOpen"){
+			conn.Ftask = "open";
+		}
+		return conn
 	}
 
 	clear(){
@@ -149,9 +155,7 @@ class TconnectionList{
 	}
 
 	log(){
-		console.log("-> log Connections XXXXXXXXXXXXXXXXXXXXXX")
 		this.iterate(c => console.log(c))
-		console.log("<- log Connections XXXXXXXXXXXXXXXXXXXXXX")
 	}
 }
 
@@ -201,14 +205,13 @@ class TremoteServer extends TstructDescr{
 	}
 
 	connectionThread(){
-		console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>> ConnectionThread <<<<<<<<<<<<<<<<<<<<<<<<<<<<< ")
 		this.FconnTimer = null
 
 		this.Fconns.log()
 
 		//first check for connections to be closed -> reduce the traffic with the server
 		this.Fconns.iterateRR(c=>{
-			if (c.task === "close"){
+			if (c.task === "close" || c.task == "closeOpen"){
 				this.send(`U ${c.port}`)
 				return this.triggerConnectionThread(1000)
 			}
@@ -241,13 +244,11 @@ class TremoteServer extends TstructDescr{
 	}
 
 	_checkActivate(){
-		console.log("_checkActivate")
 		this.FcheckActivateTimer = null
 
 		//retireve a list of all structures beeing observed
 		const observed : TobservedItem[] = []
 		this.FdataStruct.collectObserved(observed,[])
-		console.log(observed)
 
 		//find all active connections for items no longer observed and flag to be closed
 		this.Fconns.iterate(conn=>{
@@ -266,10 +267,9 @@ class TremoteServer extends TstructDescr{
 
 	}
 
+	//this is called in types.ts
 	checkActivation(){
-		console.log("checkActivation")
 		if (this.FcheckActivateTimer) clearTimeout(this.FcheckActivateTimer)
-		console.log("trigger checkActivation")
 		this.FcheckActivateTimer = setTimeout(()=>{this._checkActivate()},100)
 	}
 	
@@ -294,10 +294,8 @@ class TremoteServer extends TstructDescr{
 		//split into port, firstItem, rest
 
 		const match = data.match(TremoteServer.LINK_MSG_PATTERN)
-		console.log(match)
 		if (!match) return
 
-		//const port = parseInt(match[1])
 		const first = parseInt(match[1])
 		let values;
 		try{
@@ -307,13 +305,21 @@ class TremoteServer extends TstructDescr{
 			console.log("parsing json failed: " + err)
 		}
 
-		console.log("handleLinkData data=",values)
+		//console.log("handleLinkData data=",values)
 
-	   // this.send("U " + port)
 		const conn = this.Fconns.findByPort(port)
-		if (!conn) return
+		if (!conn){
+			console.log("conn undefined... send U")
+			this.send("U " + port)	//close port if not assoziated with anything
+			return
+		}
 
-		conn.dataReceived()             //stop requesting
+		//ignore messages to ports that are about to be closed
+		if (conn.task == "close" || conn.task == "closeOpen"){
+			return;
+		}
+
+		conn.dataReceived()             //task=linked ->stop requesting
 		this.FupdatesDisabled = true
 		try{
 			conn.struct?.readValueArray(values,first)
@@ -324,13 +330,16 @@ class TremoteServer extends TstructDescr{
 	}
 
 	handleUnlinkMessage(port : number){
-		this.Fconns.setToClosed(port)
+		if (this.Fconns.setToClosed(port)){
+			this.triggerConnectionThread();
+		}
 	}
 
 	static ERR_MSG_PATTERN = /^\s*(\d+)\s*(.*)/
 	handleErrorMessage(port: number, data : string){
 		console.log(`handleErrorMessage data = "${data}"`)
 		const match = data.match(TremoteServer.ERR_MSG_PATTERN)
+		console.log(match)
 		if (!match) return
 
 		const errCode = parseInt(match[1])
@@ -351,21 +360,33 @@ class TremoteServer extends TstructDescr{
 			case 4: return
 
 			//invalid port
-			case 5: return //this.Fconns.setToClosed(port)
+			case 5: 
+				return this.Fconns.setToClosed(port)
 
 			//INVALID CMD
 			case 6: return
 
-			case 100: return this.Fcomm.close()       //connection has been rejected... stop trying
+			//maximum number of clients reached
+			case 100: 
+				console.log("asdlkfjakdsjflasd")
+				this.Fcomm.callbacks.emitError("Max number of clients exceeded")
+				return this.Fcomm.close()       //connection has been rejected... stop trying
 		}
 	}
 
 	handleTypeMessage(port : number, data : string){
 		//toDo! check if struct already exists, compare
 		console.log("T answer received")
+		//console.log(data)
+		this.stopTypeRequests();
+		/**
+		 * toDo: check if the structure is the same like our local one
+		 * in this case we don't have to clear and build it again
+		 */
+		this.FdataStruct.clear();
 		if (this.FdataStruct.childs.length === 0){
 			this.FdataStruct.parseJsonStr(data)
-			this.FdataStruct.log()
+			//this.FdataStruct.log()
 			this.installUpdateObservers()
 			this.emitOnChange()
 		}
@@ -374,7 +395,6 @@ class TremoteServer extends TstructDescr{
 	static MSG_PATTERN = /([a-z,A-Z])\s(\d+)\s?(.*)/
 	onMessageStr(input : string){
 		//split into cmd and payload
-		//console.log("parsing")
 		const match = input.match(TremoteServer.MSG_PATTERN)
 		//console.log(match)
 		if (!match) return
@@ -386,7 +406,10 @@ class TremoteServer extends TstructDescr{
 		switch(cmd){
 			case "l": return this.handleLinkMessage(port,data)
 			case "u": return this.handleUnlinkMessage(port)
-			case "E": return this.handleErrorMessage(port,data)
+			case "E": 
+				console.log(input)
+				return this.handleErrorMessage(port,data)
+			case "B": return //this.sendTypeReq()
 			case "t": return this.handleTypeMessage(port,data)
 		}
 	}
@@ -405,11 +428,13 @@ class TremoteServer extends TstructDescr{
 		console.log("closed")
 		//this.Fconns.clear();
 		this.status = "closed"
+		this.stopTypeRequests();
 	}
 
 	onReconnecting(){
 		console.log("remoteServer: reconnect")
 		this.status = "reconnecting"
+		this.stopTypeRequests();
 	}
 
 	send(_msg : string){
@@ -417,17 +442,22 @@ class TremoteServer extends TstructDescr{
 		console.log(`sending "${_msg}"`)
 		this.Fcomm.send(_msg);
 	}
-
-	sendTypeReq(){
+	doSendTypeReq(){
 		console.log("sendTypeReq")
 		this.send("T")
-/*
-		if (this.FtypeTimer) clearTimeout(this.FtypeTimer)
-		this.FtypeTimer = setTimeout(()=>{
-			console.log("sjkdflksdf")
-			this.sendTypeReq()
-		},5000)
-*/ 
+	}
+
+	stopTypeRequests(){
+		if (this.FtypeTimer) clearInterval(this.FtypeTimer)
+	}
+
+	sendTypeReq(){
+		this.doSendTypeReq()
+		if (this.FtypeTimer) clearInterval(this.FtypeTimer)
+		this.FtypeTimer = setInterval(()=>{
+			console.log("timeout: sendTypeReq again")
+			this.doSendTypeReq()
+		},2000)
 	}
 
 	requestTypes(){

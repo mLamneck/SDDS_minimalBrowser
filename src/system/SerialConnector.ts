@@ -80,7 +80,7 @@ export class SerialConnector implements IComm {
 				: typeof error === 'string'
 				? error
 				: JSON.stringify(error);
-
+			this.port = undefined
 			this.callbacks.emitError(errorMessage);
 			throw errorMessage;		
 		}

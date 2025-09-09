@@ -12,6 +12,7 @@ export function SerialConnectorGui({ comm }: { comm: SerialConnector }) {
 		}).catch((e)=>{
 			console.log(e)
 			setError(e)
+			setConnected(false)
 		})
 	};
 

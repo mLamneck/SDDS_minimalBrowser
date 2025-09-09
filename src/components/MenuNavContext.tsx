@@ -1,13 +1,14 @@
 import { createContext, ComponentChildren } from "preact";
-import { useObserver } from "../hooks/useObserver"
 import { useContext } from "preact/hooks";
-import { TnumberDescr, Tdescr, TstructDescr } from "../system/sdds/types";
+import { useRef } from "preact/hooks";
+import { TnumberDescr, Tdescr, TstructDescr, Tobserver } from "../system/sdds/types";
 
 class TmenuNavStateClass extends TstructDescr{
     private FfocusedRow = new TnumberDescr();
     private Fediting = new TnumberDescr();
     private FrootStruct : TstructDescr;
     private FcurrStruct : TstructDescr;
+	private Fcb : Tobserver | undefined;
     status = new Tdescr;
 
     get focusedRow() { return this.FfocusedRow }
@@ -21,6 +22,11 @@ class TmenuNavStateClass extends TstructDescr{
     constructor(_struct : TstructDescr){
         super()
         this.FrootStruct = _struct
+		this.Fcb = this.FrootStruct.observers.add((d)=>{
+			this.Fcb?.setActive(false)
+			this.enterStruct(this.FrootStruct)
+			this.Fcb?.setActive(true)
+		})
         this.FcurrStruct = _struct
     }
 
@@ -99,10 +105,9 @@ type TmenuNavProviderProps = {
 }
 
 function MenuNavProvider({root, children} : TmenuNavProviderProps) {
-    const navState = new TmenuNavStateClass(root);
-
-    return (
-        <MenuNavContext.Provider value={navState}>
+    const navState = useRef(new TmenuNavStateClass(root));
+	return (
+        <MenuNavContext.Provider value={navState.current}>
             {children}
         </MenuNavContext.Provider>
     )
