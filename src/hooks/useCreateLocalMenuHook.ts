@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'preact/hooks'
-import { TstructDescr, TenumDescr } from '../system/sdds/types' 
+import { TstructDescr, TenumDescr, Tobserver } from '../system/sdds/types' 
 
 function useCreateLocalMenuHook(){
     const [struct, setStruct] = useState<TstructDescr>()
@@ -30,8 +30,13 @@ function useCreateLocalMenuHook(){
 	  `
 	  menuDefStr = `
 		{"e":{"0":["ON","OFF"],"1":["warmup","cooldown"],"2":["OFF","ON"]},"d":[[66,0,"CH0",[[49,0,"myswitch",0],[49,0,"heatState",1],[36,0,"input"],[36,0,"output"],[40,0,"float64"]]],[66,0,"CH1",[[49,0,"myswitch",0],[49,0,"heatState",1],[36,0,"input"],[36,0,"output"],[40,0,"float64"]]],[66,0,"CH2",[[49,0,"myswitch",0],[49,0,"heatState",1],[36,0,"input"],[36,0,"output"],[40,0,"float64"]]],[66,0,"PARTICLE_IO",[[49,128,"publish",2],[66,0,"variables",[[66,0,"CH0",[[66,0,"myswitch",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"heatState",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"input",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"output",[[4,128,"UpdateTime"],[1,128,"decimals"]]]]],[66,0,"CH1",[[66,0,"myswitch",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"heatState",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"input",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"output",[[4,128,"UpdateTime"],[1,128,"decimals"]]]]],[66,0,"CH2",[[66,0,"myswitch",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"heatState",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"input",[[4,128,"UpdateTime"],[1,128,"decimals"]]],[66,0,"output",[[4,128,"UpdateTime"],[1,128,"decimals"]]]]]]],[129,8,"func"],[129,8,"param"],[20,0,"funcRes"],[20,0,"logChs"]]]]}	  
+	  `	  
+
+  	  menuDefStr = `
+		{"e":{"5":["ON","OFF"],"4":["___","connect"],"3":["connect","waitConnect","connected","fallback"],"2":["STA","AP"],"1":["___","save","load"],"0":["___","crc","invStrLen","outOfMem","invVers"]},"d":[[66,0,"pid",[[49,0,"Ctrl",5],[36,0,"In"],[36,0,"Out"],[36,0,"Set"],[36,128,"P"],[36,128,"I"],[36,128,"D"]]],[66,0,"wifi",[[49,0,"action",4],[49,1,"status",3],[1,1,"checkCnt"],[49,1,"currMode",2],[49,0,"mode",2],[129,9,"ip"],[129,136,"ssid"],[129,136,"password"],[129,136,"hostname"]]],[66,0,"params",[[49,0,"action",1],[49,0,"error",0],[2,0,"size"],[4,0,"time"]]]]}
 	  `
-/*
+
+	  /*
 */
         //menuDefStr = '[{"type":1,"opt":1,"name":"cntSwitchAprettyLongName","value":"on","enums":["on","off"]},{"type":1,"opt":1,"name":"Fcnt","value":5},{"type":66,"opt":0,"name":"sub","value":[{"type":1,"opt":0,"name":"filter","value":10},{"type":36,"opt":0,"name":"value21","value":7.50},{"type":4,"opt":0,"name":"time1","value":1000},{"type":1,"opt":0,"name":"led","value":"off","enums":["on","off"]}]},{"type":1,"opt":0,"name":"filter","value":10},{"type":36,"opt":0,"name":"value","value":0.00},{"type":36,"opt":0,"name":"fValue","value":0.00}]'
         struct.parseJsonStr(menuDefStr)
@@ -56,10 +61,25 @@ function useCreateLocalMenuHook(){
                 }
             })
         }
+		/*
+		struct.childs[0].observers.add((item)=>{
+			console.log("sadjflasjdl",item.value)
+			if (item.value == 1){
+				struct.childs[2].value = 0;
 
-        const timerIntv = window.setInterval(handleTimer, 1000)
+			}
+		})
+		function handleTimer1(){
+			struct.childs[3].value = 25
+			struct.childs[1].value = (25 + Math.random()).toFixed(2);
+			if (struct.childs[0].value == 0){
+				struct.childs[2].value = (50 + Math.random()).toFixed(2);
+			}
+		}
+		*/
+        //const timerIntv = window.setInterval(handleTimer1, 1000)
         return () => {
-            window.clearInterval(timerIntv)
+            //window.clearInterval(timerIntv)
         }
     }, [])
 

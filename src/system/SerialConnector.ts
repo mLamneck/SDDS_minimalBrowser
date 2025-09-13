@@ -95,16 +95,23 @@ export class SerialConnector implements IComm {
 			try {
 				while (this.reader && !this.closeReq) {
 					const { value, done } = await this.reader.read();
-					console.log(value)
+
 					if (done || this.closeReq) {
+						this.buffer = "";
 						this.reader.releaseLock();
 						return;
 					}
+
 					if (value) {
 						this.buffer += value;
-						const lines = this.buffer.split('\n');
-						this.buffer = lines.pop() || '';
-						lines.forEach(line => this.callbacks.emitMessage(line.trim()));
+						let lines = this.buffer.split("\n");
+						this.buffer = lines.pop() ?? "";
+
+						for (const line of lines) {
+							if (line.trim().length > 0) {
+								this.callbacks.emitMessage(line.trim());
+							}
+						}
 					}
 				}
 			} catch (error) {
