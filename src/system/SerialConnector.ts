@@ -47,6 +47,7 @@ export class SerialConnector implements IComm {
 
 	private async initRead(){
 		if (!this.port?.readable) {
+			// note: automatic reconnect is NOT possible without navigator.serial.requestPort() which requires user instigated action
 			throw new Error("Serial port is not readable");
 		}
 
