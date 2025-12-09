@@ -64,6 +64,10 @@ export class SerialConnector implements IComm {
 	async connect() {
 		if (this.port) return true;
 		try {
+			if (!('serial' in navigator)) {
+				window.alert('Web Serial API is not supported in this browser.\nPlease try a different browser (e.g. Chrome, Edge).');
+				throw new Error('no web serial access');
+			}
 			this.port = await navigator.serial.requestPort();
 			console.log(this.port)
 
