@@ -61,6 +61,17 @@ export class SerialConnector implements IComm {
 		this.closeReq = false;
 	}
 
+	private emitError(error : any) {
+		console.log(error);
+		const errorMessage =
+			error instanceof Error
+			? error.message
+			: typeof error === "string"
+			? error
+			: JSON.stringify(error);
+		this.callbacks.emitError(errorMessage);
+	}
+
 	async connect() {
 		if (this.port) return true;
 		try {
@@ -74,19 +85,15 @@ export class SerialConnector implements IComm {
 			await this.port?.open({ baudRate: 115200, bufferSize:16777216 });
 
 			await this.initRead();
-			this.readLoop();
+			this.readLoop().catch(error => {
+				this.port = undefined;
+				this.emitError(error);
+			});
 			this.callbacks.emitOpen();
 			return true;
 		} catch (error) {
-			const errorMessage =
-			error instanceof Error
-				? error.message
-				: typeof error === 'string'
-				? error
-				: JSON.stringify(error);
-			this.port = undefined
-			this.callbacks.emitError(errorMessage);
-			throw errorMessage;		
+			this.port = undefined;
+			this.emitError(error);
 		}
 	}
 
@@ -131,7 +138,8 @@ export class SerialConnector implements IComm {
 					await this.writer?.close();
 					await this.writeableStreamClosePromise;	
 				}
-				this.initRead();
+				// try to reinit
+				await this.initRead();
 			}
 		}
 	}

@@ -6,20 +6,26 @@ export function SerialConnectorGui({ comm }: { comm: SerialConnector }) {
 	const [error, setError] = useState("")
 
 	const connect = () => {
-		comm.connect().then(()=>{
-			setConnected(true);
-			setError("")
-		}).catch((e)=>{
-			console.log(e)
-			setError(e)
-			setConnected(false)
-		})
+		comm.connect();
 	};
 
 	const disconnect = async () => {
 		await comm.close();
-		setConnected(false);
-	}
+	};
+
+	comm.callbacks.subscribe({
+		onclose : () => { 
+			setConnected(false); 
+		},
+		onopen : () => { 
+			setError(""); 
+			setConnected(true); 
+		},
+		onerror : (err) => { 
+			setError(err); 
+			setConnected(false); 
+		}
+	});
 
 	return<>
 		<div className="connection-status">
